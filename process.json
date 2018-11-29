@@ -1,0 +1,10 @@
+{
+    "apps" : [
+      {
+        "name"        : "mean-light",
+        "script"      : "npm -- start:prod",
+        "log_date_format" : "YYYY-MM-DD HH:mm:ss.SSS Z"
+      }
+    ]
+  }
+  
