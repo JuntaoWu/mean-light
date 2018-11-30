@@ -1,0 +1,89 @@
+<!-- NG-ZORRO -->
+<nz-layout>
+  <nz-sider style="overflow: auto; height: 100vh; position: fixed; left: 0">
+  <div class="logo">
+  </div>
+  <ul nz-menu [nzTheme]="'dark'" [nzMode]="'inline'">
+    <li nz-menu-item>
+    <span class="nav-text">资源管理</span>
+    </li>
+  </ul>
+  </nz-sider>
+  <nz-layout style="margin-left: 200px;">
+    <nz-header style="background: #fff; padding:0;"></nz-header>
+    <nz-content style="margin:24px 16px 0;overflow: hidden;">
+      <div style="padding: 24px; background: #fff; text-align: left; bottom: 10px; ">
+        <nz-tabset [nzTabPosition]="'top'" [nzType]="'card'" [(nzSelectedIndex)]="activeTab" (nzSelectChange)="selectChange()">
+          <nz-tab nzTitle="新增题库">
+            <form nz-form style="text-align: center;">
+              <nz-form-item>
+                <nz-form-label [nzSpan]="6" nzFor="questionsId">题库编号</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                  <input nz-input [ngModelOptions]="{standalone: true}" id="questionsId" placeholder="题库编号不能重复.." [(ngModel)]="question.questionsId">
+                </nz-form-control>
+
+                <nz-form-label [nzSpan]="6" nzFor="questionsNo">题库ID(苹果ID):</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                  <input nz-input [ngModelOptions]="{standalone: true}" id="questionsNo" placeholder="请填写该题库在appstroe上的商品id.." [(ngModel)]="question.questionsNo">
+                </nz-form-control>
+              
+                <nz-form-label [nzSpan]="6" nzFor="questionTitle">题库标题</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                  <input nz-input [ngModelOptions]="{standalone: true}" id="questionTitle" placeholder="请填写题库标题.." [(ngModel)]="question.questionTitle">
+                </nz-form-control>
+                
+                <nz-form-label [nzSpan]="6" nzFor="questionDes">题库描述</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                  <textarea (onChange)="judgeCanSunmit()" nz-input rows="4" id="questionDes" placeholder="请填写题库描述.."
+                            [ngModelOptions]="{standalone: true}" [(ngModel)]="question.questionDes"></textarea>
+                </nz-form-control>
+                            
+                <nz-form-label [nzSpan]="6" nzFor="qUrl">上传题库资源</nz-form-label>
+                <nz-form-control [nzSpan]="14">
+                  <nz-upload
+                    [(nzFileList)]="fileList"
+                    [nzBeforeUpload]="beforeUpload">
+                    <button nz-button>
+                      <i nz-icon type="upload"></i><span>Select File</span>
+                    </button>
+                  </nz-upload>
+                  <span> {{ question.qUrl && question.qUrl.split("uploads/")[1] }} </span>
+                </nz-form-control>
+              </nz-form-item >
+              <button nz-button nzType="primary" [nzLoading]="uploading" (click)="handleSubmit()" [disabled]="cannotSubmit">提交</button>
+            </form>
+          </nz-tab>
+          <nz-tab nzTitle="题库列表">  
+            <div style="width: 90%;overflow-x: auto;">
+              <nz-table #basicTable [nzData]="questionList">
+                <thead>
+                <tr>
+                  <th>题库编号</th>
+                  <th>题库商品ID</th>
+                  <th>题库标题</th>
+                  <th>题库描述</th>
+                  <th>更新时间</th>
+                  <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr *ngFor="let data of basicTable.data">
+                  <td>{{data.questionsId}}</td>
+                  <td>{{data.questionsNo}}</td>
+                  <td>{{data.questionTitle}}</td>
+                  <td>{{data.questionDes}}</td>
+                  <td>{{data.updateTime}}</td>
+                  <td>
+                      <button nz-button nzType="default" (click)="editQuestion(data.questionsId)">编辑</button>
+                  </td>
+                </tr>
+                </tbody>
+              </nz-table>
+            </div>
+          </nz-tab>
+        </nz-tabset>
+      </div>
+    </nz-content>
+    <nz-footer style="text-align: center;"></nz-footer>
+  </nz-layout>
+</nz-layout>
