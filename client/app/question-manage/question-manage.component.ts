@@ -69,7 +69,7 @@ export class QuestionManageComponent implements OnInit {
     const formData = new FormData();
     formData.append('files', this.fileList[0]);
     this.uploading = true;
-    const req = new HttpRequest('POST', 'http://localhost:4040/upload', formData, {
+    const req = new HttpRequest('POST', '/api/upload', formData, {
       
     });
     await this.http
@@ -92,10 +92,10 @@ export class QuestionManageComponent implements OnInit {
     }
     if (this.fileList[0]) {
       await this.fileUpload();
-      this.question.qUrl = "http://localhost:4040/uploads/" + this.fileList[0].name;
+      this.question.qUrl = "/api/uploads/" + this.fileList[0].name;
     }
     console.log(this.question.qUrl)
-    const req = new HttpRequest('POST', 'http://localhost:4040/questions/save', this.question, {
+    const req = new HttpRequest('POST', '/api/questions/save', this.question, {
       
     });
     this.http
@@ -114,7 +114,7 @@ export class QuestionManageComponent implements OnInit {
   }
 
   getQuestionList() {
-    const req = new HttpRequest('GET', 'http://localhost:4040/questions/', {tiemStamp: "2018-11-25"}, {
+    const req = new HttpRequest('GET', '/api/questions/', {tiemStamp: "2018-11-25"}, {
       
     });
     this.http
