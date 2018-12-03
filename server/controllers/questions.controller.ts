@@ -4,7 +4,7 @@ import { IncomingMessage } from 'http';
 import { date } from 'joi';
 
 export let load = async (questionsId: string) => {
-    return QuestionModel.findOne({ questionsId: questionsId });
+    return QuestionModel.findOne({ _id: questionsId });
 };
 
 export let list = async (params: { limit?: number, skip?: number, timeStamp?: string }) => {

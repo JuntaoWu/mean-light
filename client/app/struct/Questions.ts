@@ -1,5 +1,5 @@
 export class Questions {
-    questionsId?: string;
+    _id?: string;
     questionsNo?: string;
     questionTitle?: string; 
     questionDes?: string; 

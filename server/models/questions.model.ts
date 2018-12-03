@@ -6,7 +6,7 @@ import { prop, Typegoose, ModelType, InstanceType } from 'typegoose';
 export class Questions extends Typegoose {
     @prop()
     questionsId: Number;
-    @prop()
+    @prop({ unique: true })
     questionsNo: String;
     @prop()
     questionTitle: String;

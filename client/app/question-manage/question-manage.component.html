@@ -2,10 +2,17 @@
 <nz-layout>
   <nz-sider style="overflow: auto; height: 100vh; position: fixed; left: 0">
   <div class="logo">
+    <div nz-col nzSpan="12">
+      <img src="/assets/manage/u4.png"/>
+    </div>
+    <div nz-col nzSpan="12">
+      <p style="font-size: 20px;">奇妙海岛</p>
+      <p>管理平台</p>
+    </div>
   </div>
   <ul nz-menu [nzTheme]="'dark'" [nzMode]="'inline'">
     <li nz-menu-item>
-    <span class="nav-text">资源管理</span>
+      <span class="nav-text">资源管理</span>
     </li>
   </ul>
   </nz-sider>
@@ -16,12 +23,12 @@
         <nz-tabset [nzTabPosition]="'top'" [nzType]="'card'" [(nzSelectedIndex)]="activeTab" (nzSelectChange)="selectChange()">
           <nz-tab nzTitle="新增题库">
             <form nz-form style="text-align: center; width: 800px;">
-              <nz-form-item>
+              <!-- <nz-form-item>
                 <nz-form-label [nzSpan]="5" nzFor="questionsId">题库编号</nz-form-label>
                 <nz-form-control [nzSpan]="15">
                   <input nz-input (blur)="isQuestionExisted()" [ngModelOptions]="{standalone: true}" id="questionsId" placeholder="题库编号不能重复.." [(ngModel)]="question.questionsId">
                 </nz-form-control>
-              </nz-form-item>
+              </nz-form-item> -->
 
               <nz-form-item>
                 <nz-form-label [nzSpan]="5" nzFor="questionsNo">题库ID(苹果ID):</nz-form-label>
@@ -67,7 +74,7 @@
               [nzData]="questionList">
                 <thead>
                 <tr>
-                  <th style="width: 100px">题库编号</th>
+                  <!-- <th style="width: 100px">题库编号</th> -->
                   <th style="width: 120px">题库商品ID</th>
                   <th style="width: 150px">题库标题</th>
                   <th>题库描述</th>
@@ -77,13 +84,16 @@
                 </thead>
                 <tbody>
                 <tr *ngFor="let data of basicTable.data">
-                  <td>{{data.questionsId}}</td>
+                  <!-- <td>{{data.questionsId}}</td> -->
                   <td>{{data.questionsNo}}</td>
                   <td>{{data.questionTitle}}</td>
                   <td>{{data.questionDes}}</td>
-                  <td>{{data.updatedAt}}</td>
+                  <td>{{data.updatedAt}}
+                    <a href="data.question
+                    ."></a>
+                  </td>
                   <td>
-                      <button nz-button nzType="default" (click)="editQuestion(data.questionsId)">编辑</button>
+                      <button nz-button nzType="default" (click)="editQuestion(data._id)">编辑</button>
                   </td>
                 </tr>
                 </tbody>

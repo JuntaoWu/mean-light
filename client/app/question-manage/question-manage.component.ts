@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Questions } from '../struct/Questions';
 import { HttpClient, HttpRequest, HttpResponse, HttpEvent } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-question-manage',
@@ -21,7 +22,7 @@ export class QuestionManageComponent implements OnInit {
   ismodalVisible: boolean = false;
   pageSize: number;
   pageIndex: number;
-  questionId: string = null;
+  questionNo: string = null;
 
   constructor(private http: HttpClient) { }
 
@@ -30,7 +31,6 @@ export class QuestionManageComponent implements OnInit {
     this.pageIndex = 1; 
     this.pageSize = 10;
     this.question = {
-      questionsId: null,
       questionsNo: null,
       questionTitle: null,
       questionDes: null,
@@ -40,7 +40,6 @@ export class QuestionManageComponent implements OnInit {
   }
 
   resetQuestion() {
-    this.question.questionsId = null;
     this.question.questionsNo = null;
     this.question.questionTitle = null;
     this.question.questionDes = null;
@@ -55,9 +54,9 @@ export class QuestionManageComponent implements OnInit {
   }
 
   isQuestionExisted() {
-    if (this.questionId == this.question.questionsId) return;
-    this.questionId = this.questionId || this.question.questionsId;
-    let req = new HttpRequest('GET', `/api/questions/${this.question.questionsId}`);
+    if (this.questionNo == this.question.questionsNo) return;
+    this.questionNo = this.questionNo || this.question.questionsNo;
+    let req = new HttpRequest('GET', `/api/levelpackage/${this.question._id}`);
     this.http
       .request(req)
       .subscribe(
@@ -84,7 +83,7 @@ export class QuestionManageComponent implements OnInit {
   }
 
   modelChange() {
-    if (!this.question.questionsId || !this.question.questionsNo) {
+    if (!this.question.questionsNo) {
       console.log("id is null");
       this.cannotSubmit = true;
       return;
@@ -105,31 +104,27 @@ export class QuestionManageComponent implements OnInit {
   async fileUpload() {
     const formData = new FormData();
     formData.append('files', this.fileList[0]);
+    formData.append('questionNo', this.question.questionsNo);
     this.uploading = true;
     const req = new HttpRequest('POST', '/api/upload', formData);
-    await this.http
+    return this.http
       .request(req)
-      .subscribe(
-        (val: any) => {
-          this.uploading = false;
-        },
-        err => {
-          this.uploading = false;
-          console.log("upload failed.");
-        }
-      );
+      .toPromise();
   }
 
   async handleSubmit() {
     this.cannotSubmit = true;
     if (this.fileList[0]) {
-      await this.fileUpload();
-      this.question.qUrl = "uploads/" + this.fileList[0].name;
+      let val: any = await this.fileUpload().catch(val => {
+
+      });
+      this.uploading = false;
+      this.question.qUrl = val.body.path;
     }
     if (this.isExisted) {
       this.question.qVersion = +this.question.qVersion + 1;
     }
-    const req = new HttpRequest('POST', '/api/questions/save', this.question);
+    const req = new HttpRequest('POST', '/api/levelpackage/save', this.question);
     this.http
       .request(req)
       .subscribe(
@@ -146,7 +141,7 @@ export class QuestionManageComponent implements OnInit {
   getQuestionList() {
     let param = { limit: this.pageSize, skip: this.pageSize * (this.pageIndex - 1) }
     // console.log(param); 
-    const req = new HttpRequest('POST', '/api/questions', {});
+    const req = new HttpRequest('POST', '/api/levelpackage', {});
     this.http
       .request(req)
       .subscribe(
@@ -171,8 +166,11 @@ export class QuestionManageComponent implements OnInit {
   }
 
   editQuestion(id?: string) {
-    this.question = { ...this.questionList.find(i => i.questionsId == id) };
-    this.questionId = id;
+    let editQuestion = this.questionList.find(i => i._id == id)
+    this.questionNo = this.question.questionsNo = editQuestion.questionsNo;
+    this.question.questionDes = editQuestion.questionDes;
+    this.question.questionTitle = editQuestion.questionTitle;
+    this.question.qUrl = editQuestion.qUrl;
     this.fileList = [];
     this.isExisted = true;
     this.cannotSubmit = true;
@@ -190,12 +188,11 @@ export class QuestionManageComponent implements OnInit {
     this.question = {
       ...this.editQuestions
     }
-    this.questionId = this.question.questionsId;
+    this.questionNo = this.question.questionsNo;
   }
 
   handleCancel(): void {
     this.ismodalVisible = false;
-    this.question.questionsId = this.questionId;
   }
 
 }

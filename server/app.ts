@@ -65,24 +65,21 @@ app.post("/api/upload", (req, res, next) => {
         //执行里面的回调函数的时候，表单已经全部接收完毕了。
         form.parse(req, (err, fields, files) => {
             const file = files.files;
-            //旧的路径
-            var oldpath = file.path;
-            //新的路径
-            var newpath = uploadDir + "/" + file.name;
+            var fileName = "/" + file.name;
             // 改名
-            fs.rename(oldpath, newpath, (err) => {
+            fs.rename(file.path, uploadDir + fileName, (err) => {
                 if(err){
                     return res.json({
                         ResultCode: 3,
                         Message: 'fails',
-                        path: oldpath,
+                        path: "uploads" + file.path.split("uploads")[1]
                     });
                 }
                 else {
                     return res.json({
                         ResultCode: 0,
                         Message: 'ok',
-                        path: newpath,
+                        path: "uploads" + fileName,
                     });
                 }
             });

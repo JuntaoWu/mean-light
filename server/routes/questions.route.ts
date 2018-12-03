@@ -4,7 +4,7 @@ const router = express.Router();
 import * as questionCtrl from '../controllers/questions.controller';
 import { Request, Response, NextFunction } from 'express';
 
-router.get('/', (req, res, next) => {
+router.get('/getLevelPackages', (req, res, next) => {
     questionCtrl.list(req.query)
         .then(question => {
             if (!question) {
