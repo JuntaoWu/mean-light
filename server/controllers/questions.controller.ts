@@ -7,13 +7,10 @@ export let load = async (questionsId: string) => {
     return QuestionModel.findOne({ questionsId: questionsId });
 };
 
-export let list = async (params: { limit?: number, timeStamp?: string }) => {
-    console.log(params);
-    const { limit = 10, timeStamp = "0000-00-00" } = params;
-    let existsCondition = {"updateTime":{$gte: timeStamp}};
-    return await QuestionModel.find(existsCondition)
-        // .limit(+limit)
-        // .exec();
+export let list = async (params: { limit?: number, skip?: number, timeStamp?: string }) => {
+    const { limit = null, skip = 0, timeStamp = "2018-12-01" } = params;
+    let existsCondition = {"updatedAt": {$gte: new Date(timeStamp).toISOString()}};
+    return await QuestionModel.find(existsCondition).limit(+limit).skip(+skip).exec();
 }
 
 export let create = async (body: any) => {

@@ -5,8 +5,7 @@ import * as questionCtrl from '../controllers/questions.controller';
 import { Request, Response, NextFunction } from 'express';
 
 router.get('/', (req, res, next) => {
-
-    questionCtrl.list(req.body)
+    questionCtrl.list(req.query)
         .then(question => {
             if (!question) {
                 return res.json({
@@ -15,12 +14,46 @@ router.get('/', (req, res, next) => {
                     State: '',
                 });
             } else {
+                let questions = question.map(i => {
+                    return {
+                        levelPackageNo: i.questionsId,
+                        levelPackageId: i.questionsNo,
+                        levelPackageTitle: i.questionTitle,
+                        levelPackageDes: i.questionDes,
+                        qVersion: i.qVersion,
+                        qUrl: i.qUrl
+                    }
+                })
+                const result = {
+                    ResultCode: 0,
+                    Message: 'OK',
+                    result: {
+                        timeStamp: req.query.timeStamp,
+                        levelPackagesData: questions
+                    },
+                };
+                // console.log(result);
+                return res.json(result);
+            }
+        })
+        .catch(next);
+});
+
+router.post('/', (req, res, next) => {
+    questionCtrl.list(req.body)
+        .then(question => {
+            if (!question) {
+                return res.json({
+                    ResultCode: 3,
+                    Message: 'Question not found and won\'t create',
+                });
+            } else {
                 const result = {
                     ResultCode: 0,
                     Message: 'OK',
                     result: question,
                 };
-                console.log(result);
+                // console.log(result);
                 return res.json(result);
             }
         })
@@ -50,31 +83,6 @@ router.get('/:id', (req, res, next) => {
                 return res.json({
                     ResultCode: 3,
                     Message: 'Question not found and won\'t create',
-                    State: '',
-                });
-            } else {
-                const result = {
-                    ResultCode: 0,
-                    Message: 'OK',
-                    result: question,
-                };
-                console.log(result);
-                return res.json(result);
-            }
-        })
-        .catch(next);
-});
-
-router.post('/load', (req, res, next) => {
-    console.log('load:', req.query);
-
-    questionCtrl.load(req.body.questionId)
-        .then(question => {
-            if (!question && !req.body.CreateIfNotExists) {
-                return res.json({
-                    ResultCode: 3,
-                    Message: 'Question not found and won\'t create',
-                    State: '',
                 });
             } else {
                 const result = {

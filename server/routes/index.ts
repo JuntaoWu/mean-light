@@ -20,5 +20,6 @@ router.use('/version', versionRouter);
 router.use('/games/:gameId', gameRouter);
 router.use('/records', recordRouter);
 router.use('/questions', questionRouter);
+router.use('/levelpackage/getLevelPackages', questionRouter);
 
 export default router;

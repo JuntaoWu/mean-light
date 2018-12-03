@@ -1,8 +1,9 @@
 export class Questions {
-    questionsId?: number;
+    questionsId?: string;
     questionsNo?: string;
     questionTitle?: string; 
     questionDes?: string; 
-    qVersion?: string; 
+    qVersion?: number; 
     qUrl?: string; 
+    updatedAt?: string;
   }
