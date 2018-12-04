@@ -13,7 +13,7 @@ export let loadByPackageId = async (levelPackageId: string) => {
 
 export let list = async (params: { limit?: number, skip?: number, timeStamp?: string }) => {
     const { limit = null, skip = 0, timeStamp = "2018-12-01" } = params;
-    let existsCondition = {"updatedAt": {$gte: new Date(timeStamp).toISOString()}};
+    let existsCondition = {"updatedAt": {$gt: new Date(timeStamp).toISOString()}};
     return await QuestionModel.find(existsCondition).limit(+limit).skip(+skip).exec();
 }
 

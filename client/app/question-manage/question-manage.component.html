@@ -90,7 +90,7 @@
                   <td>{{data.levelPackageId}}</td>
                   <td>{{data.questionTitle}}</td>
                   <td>{{data.questionDes}}</td>
-                  <td>{{data.updatedAt}}</td>
+                  <td>{{data.updatedAt | date:"yyyy-MM-dd h:m:s"}}</td>
                   <td>
                       <button nz-button nzType="default" (click)="editQuestion(data._id)">编辑</button>
                       <a href="{{ data.qUrl }}" download="{{ data.qUrl.replace('uploads/', '') }}">下载题库</a>

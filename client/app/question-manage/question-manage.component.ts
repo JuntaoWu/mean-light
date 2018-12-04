@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Questions } from '../struct/Questions';
 import { HttpClient, HttpRequest, HttpResponse, HttpEvent } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { ManageService } from "../manage.service"
 
 @Component({
   selector: 'app-question-manage',
@@ -24,7 +25,7 @@ export class QuestionManageComponent implements OnInit {
   pageIndex: number;
   questionNo: string = null;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private manageService: ManageService) { }
 
   ngOnInit() {
     this.isEdit = false;
@@ -140,31 +141,30 @@ export class QuestionManageComponent implements OnInit {
   getQuestionList() {
     let param = { limit: this.pageSize, skip: this.pageSize * (this.pageIndex - 1) }
     // console.log(param); 
-    const req = new HttpRequest('POST', '/api/levelpackage', {});
-    this.http
-      .request(req)
-      .subscribe(
-        (val: any) => {
-          console.log(val)
-          if (val.body && val.body.result) {
-            this.questionList = val.body.result.map(i => {
-              let date = new Date(i.updatedAt);
-              let h: string|number = date.getHours(), 
-                  m: string|number = date.getMinutes(), 
-                  s: string|number = date.getSeconds();
-              h = h < 10 ? "0" + h : h;
-              m = m < 10 ? "0" + m : m;
-              s = s < 10 ? "0" + s : s;
-              return {
-                ...i,
-                updatedAt: `${i.updatedAt.substr(0, 10)} ${h}:${m}:${s}`
-              }
-            });
-          }
-        },
-        err => {
-        }
-      );
+    // const req = new HttpRequest('POST', '/api/levelpackage', {});
+    // this.http
+    //   .request(req)
+    //   .subscribe(
+    //     (val: any) => {
+    //       console.log(val)
+    //       if (val.body && val.body.result) {
+    //         this.questionList = val.body.result.map(i => {
+    //           return { ...i }
+    //         });
+    //       }
+    //     },
+    //     err => {
+    //     }
+    //   );
+    this.manageService.getQuestionList().subscribe((val: any) => {
+      console.log(val)
+      if (val.result) {
+        this.questionList = val.result.map(i => {
+          return { ...i }
+        });
+      }
+    });
+
   }
 
   editQuestion(id?: string) {
@@ -188,6 +188,7 @@ export class QuestionManageComponent implements OnInit {
       this.resetQuestion();
     }
     else {
+      this.isEdit = true;
       this.question = {
         ...this.editQuestions
       }

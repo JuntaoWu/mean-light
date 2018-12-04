@@ -3,6 +3,7 @@ const router = express.Router();
 
 import * as questionCtrl from '../controllers/questions.controller';
 import { Request, Response, NextFunction } from 'express';
+import * as _ from 'lodash';
 
 router.get('/getLevelPackages', (req, res, next) => {
     questionCtrl.list(req.query)
@@ -14,7 +15,7 @@ router.get('/getLevelPackages', (req, res, next) => {
                     State: '',
                 });
             } else {
-                let questions = question.map(i => {
+                const questions = question.map(i => {
                     return {
                         levelPackageNo: i._id,
                         levelPackageId: i.levelPackageId,
@@ -28,7 +29,7 @@ router.get('/getLevelPackages', (req, res, next) => {
                     ResultCode: 0,
                     Message: 'OK',
                     result: {
-                        timeStamp: req.query.timeStamp,
+                        timeStamp: _.maxBy(question, "updatedAt").updatedAt,
                         levelPackagesData: questions
                     },
                 };
