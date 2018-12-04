@@ -1,6 +1,6 @@
 import * as express from 'express';
 const router = express.Router();
-
+import * as _ from 'lodash';
 import * as questionCtrl from '../controllers/questions.controller';
 import { Request, Response, NextFunction } from 'express';
 
@@ -14,7 +14,7 @@ router.get('/getLevelPackages', (req, res, next) => {
                     State: '',
                 });
             } else {
-                let questions = question.map(i => {
+                const questions = question.map(i => {
                     return {
                         levelPackageNo: i._id,
                         levelPackageId: i.levelPackageId,
@@ -22,13 +22,19 @@ router.get('/getLevelPackages', (req, res, next) => {
                         levelPackageDes: i.questionDes,
                         qVersion: i.qVersion,
                         qUrl: i.qUrl
-                    }
-                })
+                    };
+                });
+
+                let newTimeStamp = req.query.timeStamp;
+                if (question && question.length) {
+                    newTimeStamp = _.maxBy(question, 'updatedAt').updatedAt;
+                }
+
                 const result = {
                     ResultCode: 0,
                     Message: 'OK',
                     result: {
-                        timeStamp: req.query.timeStamp,
+                        timeStamp: newTimeStamp,
                         levelPackagesData: questions
                     },
                 };

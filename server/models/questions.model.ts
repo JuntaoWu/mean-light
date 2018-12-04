@@ -14,6 +14,9 @@ export class Questions extends Typegoose {
     qVersion: String;
     @prop()
     qUrl: String;
+
+    @prop()
+    updatedAt: Date;
 }
 
 const GameModel = new Questions().getModelForClass(Questions, {
