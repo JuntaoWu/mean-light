@@ -70,8 +70,9 @@ export class QuestionManageComponent implements OnInit {
             this.showModal("当前题库ID已存在，你要修改该题库吗？");
           }
           else {
-            // this.isEdit = false;
-            // this.cannotSubmit = false;
+            if (this.isEdit) {
+              this.cannotSubmit = false;
+            }
           }
         },
         err => {
@@ -180,23 +181,20 @@ export class QuestionManageComponent implements OnInit {
 
   handleOk(): void {
     this.ismodalVisible = false;
-    if (!this.isEdit) {
-      this.isEdit = true;
+    if (this.tips == "确定放弃编辑该题库？") {
+      this.resetQuestion();
+    }
+    else {
       this.question = {
         ...this.editQuestions
       }
       this.questionNo = this.question.levelPackageId;
     }
-    else {
-      this.resetQuestion();
-    }
   }
 
   handleCancel(): void {
     this.ismodalVisible = false;
-    if (!this.isEdit) {
-      this.question.levelPackageId = this.questionNo;
-    }
+    this.question.levelPackageId = this.questionNo;
   }
 
 }
