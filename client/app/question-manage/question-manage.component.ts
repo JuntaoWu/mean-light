@@ -149,9 +149,12 @@ export class QuestionManageComponent implements OnInit {
           if (val.body && val.body.result) {
             this.questionList = val.body.result.map(i => {
               let date = new Date(i.updatedAt);
-              let h = date.getHours(), 
-                  m = date.getMinutes(), 
-                  s = date.getSeconds();
+              let h: string|number = date.getHours(), 
+                  m: string|number = date.getMinutes(), 
+                  s: string|number = date.getSeconds();
+              h = h < 10 ? "0" + h : h;
+              m = m < 10 ? "0" + m : m;
+              s = s < 10 ? "0" + s : s;
               return {
                 ...i,
                 updatedAt: `${i.updatedAt.substr(0, 10)} ${h}:${m}:${s}`
