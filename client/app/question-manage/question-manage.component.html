@@ -31,9 +31,9 @@
               </nz-form-item> -->
 
               <nz-form-item>
-                <nz-form-label [nzSpan]="5" nzFor="questionsNo">题库ID(苹果ID):</nz-form-label>
+                <nz-form-label [nzSpan]="5" nzFor="levelPackageId">题库ID(苹果ID)</nz-form-label>
                 <nz-form-control [nzSpan]="15">
-                  <input nz-input (ngModelChange)="modelChange()" [ngModelOptions]="{standalone: true}" id="questionsNo" placeholder="请填写该题库在appstroe上的商品id.." [(ngModel)]="question.questionsNo">
+                  <input nz-input (blur)="isQuestionExisted()" [ngModelOptions]="{standalone: true}" id="levelPackageId" placeholder="请填写该题库在appstroe上的商品id.." [(ngModel)]="question.levelPackageId">
                 </nz-form-control>
               </nz-form-item>
 
@@ -65,7 +65,11 @@
                   <span *ngIf="question.qUrl"> 已关联题库文件: {{ question.qUrl && question.qUrl.split("uploads/")[1] }} </span>
                 </nz-form-control>
               </nz-form-item >
-              <button nz-button nzType="primary" [nzLoading]="uploading" (click)="handleSubmit()" [disabled]="cannotSubmit">提交</button>
+              
+              <nz-form-item>
+                <button nz-button nzType="primary" [nzLoading]="uploading" (click)="handleSubmit()" [disabled]="cannotSubmit">提交</button>
+                <button nz-button nzType="primary" *ngIf="isEdit" (click)="showModal('确定放弃编辑该题库？')" style="margin-left: 20px;">放弃编辑</button>
+              </nz-form-item>
             </form>
           </nz-tab>
           <nz-tab nzTitle="题库列表">  
@@ -79,21 +83,19 @@
                   <th style="width: 150px">题库标题</th>
                   <th>题库描述</th>
                   <th style="width: 150px">更新时间</th>
-                  <th style="width: 80px">操作</th>
+                  <th style="width: 150px">操作</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr *ngFor="let data of basicTable.data">
                   <!-- <td>{{data.questionsId}}</td> -->
-                  <td>{{data.questionsNo}}</td>
+                  <td>{{data.levelPackageId}}</td>
                   <td>{{data.questionTitle}}</td>
                   <td>{{data.questionDes}}</td>
-                  <td>{{data.updatedAt}}
-                    <a href="data.question
-                    ."></a>
-                  </td>
+                  <td>{{data.updatedAt}}</td>
                   <td>
                       <button nz-button nzType="default" (click)="editQuestion(data._id)">编辑</button>
+                      <a href="{{ data.qUrl }}" download="{{ data.qUrl.replace('uploads/', '') }}">下载题库</a>
                   </td>
                 </tr>
                 </tbody>

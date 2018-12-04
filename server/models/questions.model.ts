@@ -4,10 +4,8 @@ import { prop, Typegoose, ModelType, InstanceType } from 'typegoose';
  * Schema
  */
 export class Questions extends Typegoose {
-    @prop()
-    questionsId: Number;
     @prop({ unique: true })
-    questionsNo: String;
+    levelPackageId: String;
     @prop()
     questionTitle: String;
     @prop()
