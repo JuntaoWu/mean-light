@@ -1,6 +1,6 @@
 export class Questions {
     _id?: string;
-    questionsNo?: string;
+    levelPackageId?: string;
     questionTitle?: string; 
     questionDes?: string; 
     qVersion?: number; 

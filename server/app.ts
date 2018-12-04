@@ -21,7 +21,7 @@ app.set('view engine', 'jade');
 app.use(bodyParser.json({
     limit: '50mb'
 }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: false }));
 
 app.use(cookieParser());
 
@@ -65,7 +65,7 @@ app.post("/api/upload", (req, res, next) => {
         //执行里面的回调函数的时候，表单已经全部接收完毕了。
         form.parse(req, (err, fields, files) => {
             const file = files.files;
-            var fileName = "/" + file.name;
+            var fileName = "/" + fields.questionNo + "-" + file.name;
             // 改名
             fs.rename(file.path, uploadDir + fileName, (err) => {
                 if(err){

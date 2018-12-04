@@ -7,6 +7,10 @@ export let load = async (questionsId: string) => {
     return QuestionModel.findOne({ _id: questionsId });
 };
 
+export let loadByPackageId = async (levelPackageId: string) => {
+    return QuestionModel.findOne({ levelPackageId: levelPackageId });
+};
+
 export let list = async (params: { limit?: number, skip?: number, timeStamp?: string }) => {
     const { limit = null, skip = 0, timeStamp = "2018-12-01" } = params;
     let existsCondition = {"updatedAt": {$gte: new Date(timeStamp).toISOString()}};

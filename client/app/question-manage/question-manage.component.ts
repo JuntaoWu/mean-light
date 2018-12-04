@@ -12,7 +12,7 @@ export class QuestionManageComponent implements OnInit {
 
   editQuestions: Questions;
   question: Questions; 
-  isExisted: boolean; //编辑题号是否已存在
+  isEdit: boolean; //编辑题库或新增题库
   tips: string;
   questionList: Array<Questions> = [];
   uploading = false;
@@ -27,11 +27,11 @@ export class QuestionManageComponent implements OnInit {
   constructor(private http: HttpClient) { }
 
   ngOnInit() {
-    this.isExisted = false;
+    this.isEdit = false;
     this.pageIndex = 1; 
     this.pageSize = 10;
     this.question = {
-      questionsNo: null,
+      levelPackageId: null,
       questionTitle: null,
       questionDes: null,
       qVersion: 1,
@@ -40,7 +40,9 @@ export class QuestionManageComponent implements OnInit {
   }
 
   resetQuestion() {
-    this.question.questionsNo = null;
+    this.isEdit = false;
+    this.questionNo = null;
+    this.question.levelPackageId = null;
     this.question.questionTitle = null;
     this.question.questionDes = null;
     this.question.qVersion = 1,
@@ -54,9 +56,9 @@ export class QuestionManageComponent implements OnInit {
   }
 
   isQuestionExisted() {
-    if (this.questionNo == this.question.questionsNo) return;
-    this.questionNo = this.questionNo || this.question.questionsNo;
-    let req = new HttpRequest('GET', `/api/levelpackage/${this.question._id}`);
+    if (this.questionNo == this.question.levelPackageId) return;
+    this.questionNo = this.questionNo || this.question.levelPackageId;
+    let req = new HttpRequest('GET', `/api/levelpackage/getByPackageId/${this.question.levelPackageId}`);
     this.http
       .request(req)
       .subscribe(
@@ -65,16 +67,11 @@ export class QuestionManageComponent implements OnInit {
             this.editQuestions = {
               ...val.body.result
             }
-            this.showModal("当前题库编号已存在，你要修改该题库吗？");
+            this.showModal("当前题库ID已存在，你要修改该题库吗？");
           }
           else {
-            this.isExisted = false;
-            if (!this.fileList.length) {
-              this.question.qUrl = "";
-              this.question.questionTitle = "";
-              this.question.questionDes = "";
-              this.cannotSubmit = true;
-            }
+            this.isEdit = false;
+            // this.cannotSubmit = false;
           }
         },
         err => {
@@ -83,12 +80,12 @@ export class QuestionManageComponent implements OnInit {
   }
 
   modelChange() {
-    if (!this.question.questionsNo) {
+    if (!this.question.levelPackageId) {
       console.log("id is null");
       this.cannotSubmit = true;
       return;
     }
-    else if (!this.isExisted && !this.fileList.length) {
+    else if (!this.isEdit && !this.fileList.length) {
       this.cannotSubmit = true;
       return;
     }
@@ -104,7 +101,7 @@ export class QuestionManageComponent implements OnInit {
   async fileUpload() {
     const formData = new FormData();
     formData.append('files', this.fileList[0]);
-    formData.append('questionNo', this.question.questionsNo);
+    formData.append('questionNo', this.question.levelPackageId);
     this.uploading = true;
     const req = new HttpRequest('POST', '/api/upload', formData);
     return this.http
@@ -121,7 +118,7 @@ export class QuestionManageComponent implements OnInit {
       this.uploading = false;
       this.question.qUrl = val.body.path;
     }
-    if (this.isExisted) {
+    if (this.isEdit) {
       this.question.qVersion = +this.question.qVersion + 1;
     }
     const req = new HttpRequest('POST', '/api/levelpackage/save', this.question);
@@ -130,6 +127,7 @@ export class QuestionManageComponent implements OnInit {
       .subscribe(
         (val: {}) => {
           this.fileList = [];
+          this.resetQuestion();
           this.getQuestionList();
         },
         err => {
@@ -167,12 +165,10 @@ export class QuestionManageComponent implements OnInit {
 
   editQuestion(id?: string) {
     let editQuestion = this.questionList.find(i => i._id == id)
-    this.questionNo = this.question.questionsNo = editQuestion.questionsNo;
-    this.question.questionDes = editQuestion.questionDes;
-    this.question.questionTitle = editQuestion.questionTitle;
-    this.question.qUrl = editQuestion.qUrl;
+    this.questionNo = editQuestion.levelPackageId;
+    this.question = { ...editQuestion };
     this.fileList = [];
-    this.isExisted = true;
+    this.isEdit = true;
     this.cannotSubmit = true;
     this.activeTab = 0;
   }
@@ -184,15 +180,23 @@ export class QuestionManageComponent implements OnInit {
 
   handleOk(): void {
     this.ismodalVisible = false;
-    this.isExisted = true;
-    this.question = {
-      ...this.editQuestions
+    if (!this.isEdit) {
+      this.isEdit = true;
+      this.question = {
+        ...this.editQuestions
+      }
+      this.questionNo = this.question.levelPackageId;
     }
-    this.questionNo = this.question.questionsNo;
+    else {
+      this.resetQuestion();
+    }
   }
 
   handleCancel(): void {
     this.ismodalVisible = false;
+    if (!this.isEdit) {
+      this.question.levelPackageId = this.questionNo;
+    }
   }
 
 }

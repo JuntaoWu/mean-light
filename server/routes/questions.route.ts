@@ -16,8 +16,8 @@ router.get('/getLevelPackages', (req, res, next) => {
             } else {
                 let questions = question.map(i => {
                     return {
-                        levelPackageNo: i.questionsId,
-                        levelPackageId: i.questionsNo,
+                        levelPackageNo: i._id,
+                        levelPackageId: i.levelPackageId,
                         levelPackageTitle: i.questionTitle,
                         levelPackageDes: i.questionDes,
                         qVersion: i.qVersion,
@@ -97,10 +97,33 @@ router.get('/:id', (req, res, next) => {
         .catch(next);
 });
 
+router.get('/getByPackageId/:id', (req, res, next) => {
+    console.log('get:', req.params);
+
+    questionCtrl.loadByPackageId(req.params.id)
+        .then(question => {
+            if (!question && !req.body.CreateIfNotExists) {
+                return res.json({
+                    ResultCode: 3,
+                    Message: 'Question not found and won\'t create',
+                });
+            } else {
+                const result = {
+                    ResultCode: 0,
+                    Message: 'OK',
+                    result: question,
+                };
+                console.log(result);
+                return res.json(result);
+            }
+        })
+        .catch(next);
+});
+
 router.post('/save', (req, res, next) => {
     console.log('save:', req.body);
 
-    return questionCtrl.update(req.body.questionsId, req.body)
+    return questionCtrl.update(req.body._id, req.body)
         .then(savedQuestion => {
             const result = {
                 ResultCode: 0,
