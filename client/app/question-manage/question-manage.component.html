@@ -2,16 +2,14 @@
 <nz-layout>
   <nz-sider style="overflow: auto; height: 100vh; position: fixed; left: 0">
   <div class="logo">
-    <div nz-col nzSpan="12">
-      <img src="/assets/manage/u4.png"/>
-    </div>
-    <div nz-col nzSpan="12">
-      <p style="font-size: 20px;">奇妙海岛</p>
+    <img src="/assets/manage/u4.png"/>
+    <div class="title">
+      <p style="font-size: 20px; margin-bottom: 0px;">奇妙海岛</p>
       <p>管理平台</p>
     </div>
   </div>
   <ul nz-menu [nzTheme]="'dark'" [nzMode]="'inline'">
-    <li nz-menu-item>
+    <li nz-menu-item [nzSelected]="true">
       <span class="nav-text">资源管理</span>
     </li>
   </ul>
@@ -92,7 +90,7 @@
                   <td>{{data.levelPackageId}}</td>
                   <td>{{data.questionTitle}}</td>
                   <td>{{data.questionDes}}</td>
-                  <td>{{data.updatedAt}}</td>
+                  <td>{{data.updatedAt | date:"yyyy-MM-dd h:m:s"}}</td>
                   <td>
                       <button nz-button nzType="default" (click)="editQuestion(data._id)">编辑</button>
                       <a href="{{ data.qUrl }}" download="{{ data.qUrl.replace('uploads/', '') }}">下载题库</a>
