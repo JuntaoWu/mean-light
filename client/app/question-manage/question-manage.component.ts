@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Questions } from '../struct/Questions';
 import { HttpClient, HttpRequest, HttpResponse, HttpEvent } from '@angular/common/http';
-import { map } from 'rxjs/operators';
 import { ManageService } from "../manage.service"
 
 @Component({
@@ -156,14 +155,19 @@ export class QuestionManageComponent implements OnInit {
     //     err => {
     //     }
     //   );
-    this.manageService.getQuestionList().subscribe((val: any) => {
-      console.log(val)
-      if (val.result) {
-        this.questionList = val.result.map(i => {
-          return { ...i }
-        });
+    this.manageService.getQuestionList().subscribe(
+      (val: any) => {
+        console.log(val)
+        if (val.result) {
+          this.questionList = val.result.map(i => {
+            return { ...i }
+          });
+        }
+      },
+      err => {
+        console.log(err);
       }
-    });
+    );
 
   }
 

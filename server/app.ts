@@ -50,15 +50,22 @@ app.use(passport.session());
 app.post("/api/upload", (req, res, next) => {
     var form = new formidable.IncomingForm();
     //设置文件上传存放地址
-    const uploadDir = path.join(__dirname, '../client/uploads');
-    fs.exists(uploadDir, async (exists) => {
-        if (!exists) {
-            await fs.mkdir(uploadDir, (err) => {
-                if(err){
-                    throw "上传文件夹不存在";
-                }
-            })
-        }
+    const uploadDir = path.join(__dirname, '../../public/uploads');
+    if (!fs.existsSync(uploadDir)) {
+        var pathtmp;
+        uploadDir.split(/[/\\]/).forEach((dirname) => {
+            if (pathtmp) {
+                pathtmp = path.join(pathtmp, dirname);
+            }
+            else {
+                pathtmp = dirname;
+            }
+            if (!fs.existsSync(pathtmp)) {
+                fs.mkdirSync(pathtmp)
+            }
+        });
+    }
+    try {
         form.uploadDir = uploadDir;
         form.keepExtensions = true;//保存扩展名
         form.maxFieldsSize = 20 * 1024 * 1024;//上传文件的最大大小
@@ -70,7 +77,7 @@ app.post("/api/upload", (req, res, next) => {
             fs.rename(file.path, uploadDir + fileName, (err) => {
                 if(err){
                     return res.json({
-                        ResultCode: 3,
+                        ResultCode: 1,
                         Message: 'fails',
                         path: "uploads" + file.path.split("uploads")[1]
                     });
@@ -83,13 +90,15 @@ app.post("/api/upload", (req, res, next) => {
                     });
                 }
             });
-            // return res.json({
-            //     ResultCode: 1,
-            //     Message: 'suc',
-            //     State: '',
-            // });
         });
-    })    
+    }
+    catch (err) {
+        return res.json({
+            ResultCode: 3,
+            Message: 'fails',
+            path: '',
+        });
+    }
 })
 
 app.use('/api', indexRouter);
