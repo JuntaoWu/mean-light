@@ -80,6 +80,20 @@ router.post('/create', (req, res, next) => {
         .catch(e => next(e));
 });
 
+router.post('/remove', (req, res, next) => {
+    console.log('remove:', req.body);
+
+    return questionCtrl.remove(req.body._id)
+        .then(question => {
+            const result = {
+                ResultCode: 0,
+                Message: 'OK'
+            };
+            return res.json(result);
+        })
+        .catch(e => next(e));
+});
+
 router.get('/:id', (req, res, next) => {
     console.log('get:', req.params);
 

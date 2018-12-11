@@ -23,6 +23,7 @@ export class QuestionManageComponent implements OnInit {
   pageSize: number;
   pageIndex: number;
   questionNo: string = null;
+  modalType: string;
 
   constructor(private http: HttpClient, private manageService: ManageService) { }
 
@@ -58,14 +59,11 @@ export class QuestionManageComponent implements OnInit {
   isQuestionExisted() {
     if (this.questionNo == this.question.levelPackageId) return;
     this.questionNo = this.questionNo || this.question.levelPackageId;
-    let req = new HttpRequest('GET', `/api/levelpackage/getByPackageId/${this.question.levelPackageId}`);
-    this.http
-      .request(req)
-      .subscribe(
+    this.manageService.getQuestionByPackageId(this.question.levelPackageId).subscribe(
         (val: any) => {
-          if (val.body && val.body.result) {
+          if (val.result) {
             this.editQuestions = {
-              ...val.body.result
+              ...val.result
             }
             this.showModal("当前题库ID已存在，你要修改该题库吗？");
           }
@@ -99,62 +97,36 @@ export class QuestionManageComponent implements OnInit {
     return false;
   }
 
-  async fileUpload() {
-    const formData = new FormData();
-    formData.append('files', this.fileList[0]);
-    formData.append('questionNo', this.question.levelPackageId);
-    this.uploading = true;
-    const req = new HttpRequest('POST', '/api/upload', formData);
-    return this.http
-      .request(req)
-      .toPromise();
-  }
-
   async handleSubmit() {
     this.cannotSubmit = true;
     if (this.fileList[0]) {
-      let val: any = await this.fileUpload().catch(val => {
-
+      const formData = new FormData();
+      formData.append('files', this.fileList[0]);
+      formData.append('questionNo', this.question.levelPackageId);
+      this.uploading = true;
+      let val: any = await this.manageService.fileUpload(formData).catch(err => {
+        console.log(err);
       });
       this.uploading = false;
-      this.question.qUrl = val.body.path;
+      this.question.qUrl = val.path;
     }
     if (this.isEdit) {
       this.question.qVersion = +this.question.qVersion + 1;
     }
-    const req = new HttpRequest('POST', '/api/levelpackage/save', this.question);
-    this.http
-      .request(req)
-      .subscribe(
-        (val: {}) => {
-          this.fileList = [];
-          this.resetQuestion();
-          this.getQuestionList();
-        },
-        err => {
-          this.cannotSubmit = false;
-        }
-      );
+    this.manageService.saveQuestion(this.question).subscribe(
+      (val: {}) => {
+        this.fileList = [];
+        this.resetQuestion();
+        this.getQuestionList();
+      },
+      err => {
+        this.cannotSubmit = false;
+      }
+    );
   }
 
   getQuestionList() {
     let param = { limit: this.pageSize, skip: this.pageSize * (this.pageIndex - 1) }
-    // console.log(param); 
-    // const req = new HttpRequest('POST', '/api/levelpackage', {});
-    // this.http
-    //   .request(req)
-    //   .subscribe(
-    //     (val: any) => {
-    //       console.log(val)
-    //       if (val.body && val.body.result) {
-    //         this.questionList = val.body.result.map(i => {
-    //           return { ...i }
-    //         });
-    //       }
-    //     },
-    //     err => {
-    //     }
-    //   );
     this.manageService.getQuestionList().subscribe(
       (val: any) => {
         console.log(val)
@@ -171,6 +143,10 @@ export class QuestionManageComponent implements OnInit {
 
   }
 
+  deleteQuestion(id?: string) {
+    this.showModal("确定删除该题库？", id);
+  }
+
   editQuestion(id?: string) {
     let editQuestion = this.questionList.find(i => i._id == id)
     this.questionNo = editQuestion.levelPackageId;
@@ -181,22 +157,34 @@ export class QuestionManageComponent implements OnInit {
     this.activeTab = 0;
   }
   
-  showModal(msg): void {
+  showModal(msg: string, type: string = 'edit-modal'): void {
     this.tips = msg;
+    this.modalType = type;
     this.ismodalVisible = true;
   }
 
   handleOk(): void {
     this.ismodalVisible = false;
-    if (this.tips == "确定放弃编辑该题库？") {
+    if (this.modalType == "cancel-edit") {
       this.resetQuestion();
     }
-    else {
+    else if (this.modalType == "edit-modal") {
       this.isEdit = true;
       this.question = {
         ...this.editQuestions
       }
       this.questionNo = this.question.levelPackageId;
+    }
+    else {
+      this.manageService.deleteQuestionById(this.modalType).subscribe(
+        (val: any) => {
+          console.log(val)
+          this.getQuestionList();
+        },
+        err => {
+          console.log(err);
+        }
+      )
     }
   }
 

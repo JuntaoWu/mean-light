@@ -66,7 +66,7 @@
               
               <nz-form-item>
                 <button nz-button nzType="primary" [nzLoading]="uploading" (click)="handleSubmit()" [disabled]="cannotSubmit">提交</button>
-                <button nz-button nzType="primary" *ngIf="isEdit" (click)="showModal('确定放弃编辑该题库？')" style="margin-left: 20px;">放弃编辑</button>
+                <button nz-button nzType="primary" *ngIf="isEdit" (click)="showModal('确定放弃编辑该题库？', 'cancel-edit')" style="margin-left: 20px;">放弃编辑</button>
               </nz-form-item>
             </form>
           </nz-tab>
@@ -81,7 +81,7 @@
                   <th style="width: 150px">题库标题</th>
                   <th>题库描述</th>
                   <th style="width: 150px">更新时间</th>
-                  <th style="width: 150px">操作</th>
+                  <th style="width: 220px">操作</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -90,9 +90,10 @@
                   <td>{{data.levelPackageId}}</td>
                   <td>{{data.questionTitle}}</td>
                   <td>{{data.questionDes}}</td>
-                  <td>{{data.updatedAt | date:"yyyy-MM-dd h:m:s"}}</td>
+                  <td>{{data.updatedAt | date:"yyyy-MM-dd hh:mm:ss"}}</td>
                   <td>
                       <button nz-button nzType="default" (click)="editQuestion(data._id)">编辑</button>
+                      <button nz-button nzType="danger" (click)="deleteQuestion(data._id)">删除</button>
                       <a href="{{ data.qUrl }}" download="{{ data.qUrl.replace('uploads/', '') }}">下载题库</a>
                   </td>
                 </tr>
