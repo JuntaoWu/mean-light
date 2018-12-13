@@ -6,7 +6,7 @@ import * as cookieParser from 'cookie-parser';
 import * as logger from 'morgan';
 import * as cors from 'cors';
 import * as fs from 'fs';
-import * as formidable  from 'formidable';
+import * as formidable from 'formidable';
 
 import indexRouter from './routes';
 import passport from './config/passport';
@@ -48,51 +48,61 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.post("/api/upload", (req, res, next) => {
-    var form = new formidable.IncomingForm();
-    //设置文件上传存放地址
+    const form = new formidable.IncomingForm();
+    // 设置文件上传存放地址
     const uploadDir = path.join(__dirname, '../../public/uploads');
     if (!fs.existsSync(uploadDir)) {
-        var pathtmp;
-        uploadDir.split(/[/\\]/).forEach((dirname) => {
-            if (pathtmp) {
-                pathtmp = path.join(pathtmp, dirname);
-            }
-            else {
-                pathtmp = dirname;
-            }
-            if (!fs.existsSync(pathtmp)) {
-                fs.mkdirSync(pathtmp)
-            }
-        });
+        try {
+            fs.mkdirSync(uploadDir, {
+                recursive: true
+            });
+            // var pathtmp;
+            // uploadDir.split(/[/\\]/).filter(i => !!i).forEach((dirname) => {
+            //     console.log(dirname);
+            //     if (pathtmp) {
+            //         pathtmp = path.join(pathtmp, dirname);
+            //     }
+            //     else {
+            //         pathtmp = dirname;
+            //     }
+            //     if (!fs.existsSync(pathtmp)) {
+            //         console.log('mkdirSync', pathtmp);
+            //         fs.mkdirSync(pathtmp);
+            //     }
+            // });
+        } catch (error) {
+            console.error(error);
+        }
     }
     try {
         form.uploadDir = uploadDir;
-        form.keepExtensions = true;//保存扩展名
-        form.maxFieldsSize = 20 * 1024 * 1024;//上传文件的最大大小
-        //执行里面的回调函数的时候，表单已经全部接收完毕了。
+        form.keepExtensions = true; // 保存扩展名
+        form.maxFieldsSize = 20 * 1024 * 1024; // 上传文件的最大大小
+        // 执行里面的回调函数的时候，表单已经全部接收完毕了。
         form.parse(req, (err, fields, files) => {
             const file = files.files;
-            var fileName = "/" + fields.questionNo + "-" + file.name;
+            const fileName = '/' + fields.questionNo + '-' + file.name;
             // 改名
-            fs.rename(file.path, uploadDir + fileName, (err) => {
-                if(err){
+            fs.rename(file.path, uploadDir + fileName, (fserr) => {
+                if (fserr) {
                     return res.json({
                         ResultCode: 1,
                         Message: 'fails',
-                        path: "uploads" + file.path.split("uploads")[1]
+                        path: 'uploads' + file.path.split('uploads')[1]
                     });
                 }
                 else {
                     return res.json({
                         ResultCode: 0,
                         Message: 'ok',
-                        path: "uploads" + fileName,
+                        path: 'uploads' + fileName,
                     });
                 }
             });
         });
     }
     catch (err) {
+        console.error(err);
         return res.json({
             ResultCode: 3,
             Message: 'fails',
