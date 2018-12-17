@@ -17,5 +17,11 @@ export default {
         params: {
             openId: Joi.string().required()
         }
-    }
+    },
+    // POST /api/user/getVerificationCode
+    getVerificationCode: {
+        body: {
+            phoneNo: Joi.string().regex(/^[1-9][0-9]{10}$/).required()
+        }
+    },
 };

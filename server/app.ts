@@ -47,7 +47,7 @@ app.use(express.static(path.join(__dirname, '../../public/sw.js'), {
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.post("/api/upload", (req, res, next) => {
+app.post('/api/upload', (req, res, next) => {
     const form = new formidable.IncomingForm();
     // 设置文件上传存放地址
     const uploadDir = path.join(__dirname, '../../public/uploads');
@@ -109,7 +109,7 @@ app.post("/api/upload", (req, res, next) => {
             path: '',
         });
     }
-})
+});
 
 app.use('/api', indexRouter);
 

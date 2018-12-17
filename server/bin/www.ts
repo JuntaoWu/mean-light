@@ -21,7 +21,7 @@ import * as mongoose from 'mongoose';
  * Get port from environment and store in Express.
  */
 
-const port = normalizePort(config.port || '4040');
+const port = normalizePort(config.port);
 
 // connect to mongo db
 const mongoUri = config.mongo.host;
@@ -60,7 +60,6 @@ server.on('listening', onListening);
 // sslServer.listen(`8084`);
 // sslServer.on('error', onError);
 // sslServer.on('listening', onListening);
-
 
 /**
  * Normalize a port into a number, string, or false.

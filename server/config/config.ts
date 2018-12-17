@@ -91,6 +91,12 @@ export const config = {
         uri: envVars.REDIS_URI,
     },
     rootUrl: envVars.ROOT_URI,
+    aliCloud: {
+        smsAccessKeyId: envVars.SMS_ACCESS_KEY_ID,
+        smsSecretAccessKey: envVars.SMS_SECRET_ACCESS_KEY,
+        smsSignName: envVars.SMS_SIGN_NAME,
+        smsTemplateCode: envVars.SMS_TEMPLATE_CODE,
+    }
 };
 
 export default config;
