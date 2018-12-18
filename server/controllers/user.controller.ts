@@ -5,6 +5,8 @@ import config from '../config/config';
 
 import { Request, Response, NextFunction } from 'express';
 import UserModel, { User } from '../models/user.model';
+import UserPurchaseRecordModel from '../models/userPurchaseRecord.model';
+import { loadByPackageId } from '../controllers/questions.controller';
 
 import * as https from 'https';
 import * as http from 'http';
@@ -18,7 +20,9 @@ import MySMSClient from '../config/sms-client';
 
 export let register = async (req: Request, res: Response, next: NextFunction) => {
 
-    // todo: first, save nickname into db.
+    let user = await UserModel.findOne({ phoneNo: req.body.phoneNo });
+    user.nickname = req.body.userName;
+    await user.save();
 
     return login(req, res, next);
 };
@@ -98,6 +102,58 @@ export let getVerificationCode = async (req, res, next) => {
             code: 10001,
             message: 'Send SMS failed'
         });
+    });
+};
+
+/**  */
+export let addProductItem = async (req: Request, res: Response, next: NextFunction) => {
+    const record = await UserPurchaseRecordModel.findOne({ phoneNo: req.user.phoneNo, produceid: req.body.levelPackageId });
+    if (!record) {
+        const product = await loadByPackageId(req.body.levelPackageId);
+        if (!product) {
+            return res.json({
+                code: 0,
+                message: 'the product does not exsit',
+            });
+        }
+        let userPurchaseProductRecord = new UserPurchaseRecordModel({
+            phoneNo: req.user.phoneNo,
+            produceid: req.body.levelPackageId,
+            title: product.questionTitle,
+        });
+        await userPurchaseProductRecord.save();
+
+        return res.json({
+            code: 10001,
+            message: 'OK',
+        });
+    }
+    else {
+        return res.json({
+            code: 0,
+            message: 'purchased',
+        });
+    }
+};
+
+/**  */
+export let getProductItems = async (req: Request, res: Response, next: NextFunction) => {
+    const records = await UserPurchaseRecordModel.find({ phoneNo: req.user.phoneNo });
+    return res.json({
+        username: req.user.nickname,
+        phoneno: req.user.phoneNo,
+        highestleve: req.user.highestLevel,
+        purchaseList: records,
+    });
+};
+
+/**  */
+export let updateHighestLevel = async (req, res, next) => {
+    req.user.highestLevel = req.body.highestLevel;
+    await req.user.save();
+    return res.json({
+        code: 0,
+        message: 'OK'
     });
 };
 

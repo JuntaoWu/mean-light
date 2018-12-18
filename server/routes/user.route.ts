@@ -1,5 +1,5 @@
 import * as express from 'express';
-import validate from 'express-validation';
+import * as validate from 'express-validation';
 import paramValidation from '../config/param-validation';
 import * as userCtrl from '../controllers/user.controller';
 import * as passport from 'passport';
@@ -17,5 +17,15 @@ router.route('/login')
 /** POST /api/user/getVerificationCode - Allow anyone to send SMS code via phoneNo */
 router.route('/getVerificationCode')
     .post(validate(paramValidation.getVerificationCode), userCtrl.getVerificationCode);
+
+/**  */
+router.route('/addProductItem')
+    .post(passport.authenticate('jwt', { failWithError: true }), userCtrl.addProductItem);
+
+router.route('/getProductItems')
+    .get(passport.authenticate('jwt', { failWithError: false }), userCtrl.getProductItems);
+
+router.route('/updateHighestLevel')
+    .post(passport.authenticate('jwt', { failWithError: true }), userCtrl.updateHighestLevel);
 
 export default router;

@@ -14,7 +14,7 @@ const router = express.Router();
 //   res.render('index', { title: 'Express' });
 // });
 
-router.use('/users', userRouter);
+router.use('/user', userRouter);
 router.use('/ranks', rankRouter);
 router.use('/version', versionRouter);
 router.use('/games/:gameId', gameRouter);

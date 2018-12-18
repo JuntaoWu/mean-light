@@ -27,6 +27,8 @@ export class User extends Typegoose {
   @prop()
   public securityStamp?: String;
 
+  @prop()
+  public highestLevel?: Number;
 }
 
 const UserModel = new User().getModelForClass(User, {

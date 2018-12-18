@@ -1,7 +1,7 @@
 import RankModel, { Rank } from '../models/rank.model';
 import { Request, Response, NextFunction } from 'express';
 import { IncomingMessage } from 'http';
-import WxUserModel, { WxUser } from '../models/wxuser.model';
+// import WxUserModel, { WxUser } from '../models/wxuser.model';
 import * as _ from 'lodash';
 
 export let leaderBoard = async (req: Request, res: Response, next: NextFunction) => {
