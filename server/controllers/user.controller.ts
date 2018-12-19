@@ -17,6 +17,7 @@ import * as uuid from 'uuid';
 
 import * as speakeasy from 'speakeasy';
 import MySMSClient from '../config/sms-client';
+import { isArray } from 'util';
 
 export let register = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -106,32 +107,80 @@ export let getVerificationCode = async (req, res, next) => {
 
 /**  */
 export let addProductItem = async (req: Request, res: Response, next: NextFunction) => {
-    const record = await UserPurchaseRecordModel.findOne({ phoneNo: req.user.phoneNo, produceid: req.body.levelPackageId });
-    if (!record) {
+    if (isArray(req.body.levelPackageId)) {
+        if (!req.body.levelPackageId.length) {
+            return res.json({
+                code: 0,
+                message: 'none',
+            });
+        }
+        let succeed = 0, exist = 0, notExist = 0;
+        for (let i = 0; i < req.body.levelPackageId.length; i++) {
+            let id = req.body.levelPackageId[i];
+            const product = await loadByPackageId(id);
+            const record = await UserPurchaseRecordModel.findOne({ phoneNo: req.user.phoneNo, produceid: id });
+            if (!product) {
+                notExist += 1;
+            }
+            else if (!record) {
+                let userPurchaseProductRecord = new UserPurchaseRecordModel({
+                    phoneNo: req.user.phoneNo,
+                    produceid: id,
+                    title: product.questionTitle,
+                });
+                await userPurchaseProductRecord.save();
+                succeed += 1;
+            }
+            else {
+                exist += 1;
+            }
+        }
+        if (succeed === req.body.levelPackageId.length) {
+            return res.json({
+                code: 10001,
+                message: 'OK',
+            });
+        }
+        else if (succeed) {
+            return res.json({
+                code: 10002,
+                message: `${succeed} succeed`,
+            });
+        }
+        else {
+            return res.json({
+                code: 0,
+                message: `${exist} products have been purchased, ${notExist} products does not exist,`,
+            });
+        }
+    }
+    else {
         const product = await loadByPackageId(req.body.levelPackageId);
+        const record = await UserPurchaseRecordModel.findOne({ phoneNo: req.user.phoneNo, produceid: req.body.levelPackageId }); 
         if (!product) {
             return res.json({
                 code: 0,
                 message: 'the product does not exsit',
             });
         }
-        let userPurchaseProductRecord = new UserPurchaseRecordModel({
-            phoneNo: req.user.phoneNo,
-            produceid: req.body.levelPackageId,
-            title: product.questionTitle,
-        });
-        await userPurchaseProductRecord.save();
-
-        return res.json({
-            code: 10001,
-            message: 'OK',
-        });
-    }
-    else {
-        return res.json({
-            code: 0,
-            message: 'purchased',
-        });
+        else if (!record) {
+            let userPurchaseProductRecord = new UserPurchaseRecordModel({
+                phoneNo: req.user.phoneNo,
+                produceid: req.body.levelPackageId,
+                title: product.questionTitle,
+            });
+            await userPurchaseProductRecord.save();
+            return res.json({
+                code: 10001,
+                message: 'OK',
+            });
+        }
+        else {
+            return res.json({
+                code: 0,
+                message: 'the product has been purchased',
+            });
+        }
     }
 };
 
