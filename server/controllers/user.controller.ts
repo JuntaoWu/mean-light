@@ -20,9 +20,8 @@ import MySMSClient from '../config/sms-client';
 
 export let register = async (req: Request, res: Response, next: NextFunction) => {
 
-    let user = await UserModel.findOne({ phoneNo: req.body.phoneNo });
-    user.nickname = req.body.userName;
-    await user.save();
+    req.user.nickname = req.body.userName;
+    await req.user.save();
 
     return login(req, res, next);
 };
@@ -142,19 +141,28 @@ export let getProductItems = async (req: Request, res: Response, next: NextFunct
     return res.json({
         username: req.user.nickname,
         phoneno: req.user.phoneNo,
-        highestleve: req.user.highestLevel,
+        highestlevel: req.user.highestLevel,
         purchaseList: records,
     });
 };
 
 /**  */
-export let updateHighestLevel = async (req, res, next) => {
-    req.user.highestLevel = req.body.highestLevel;
-    await req.user.save();
-    return res.json({
-        code: 0,
-        message: 'OK'
-    });
+export let updateHighestLevel = async (req: Request, res: Response, next: NextFunction) => {
+    const highestLevel = Math.max((req.user.highestLevel || 0), (req.body.highestLevel || 0));
+    if (req.user.highestLevel === highestLevel) {
+        return res.json({
+            code: 10001,
+            message: 'no update'
+        });   
+    }
+    else {
+        req.user.highestLevel = highestLevel;
+        await req.user.save();
+        return res.json({
+            code: 0,
+            message: 'OK'
+        });    
+    }
 };
 
 export default { login, getVerificationCode };
