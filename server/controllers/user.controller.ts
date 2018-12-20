@@ -105,71 +105,51 @@ export let getVerificationCode = async (req, res, next) => {
     });
 };
 
-/**  */
-export let addProductItem = async (req: Request, res: Response, next: NextFunction) => {
-    if (isArray(req.body.levelPackageId)) {
-        if (!req.body.levelPackageId.length) {
-            return res.json({
-                code: 0,
-                message: 'none',
-            });
-        }
-        let succeed = 0, exist = 0, notExist = 0;
-        for (let i = 0; i < req.body.levelPackageId.length; i++) {
-            let id = req.body.levelPackageId[i];
+let addProduct = (phoneNo: any, ids: Array<string>) => {
+    return new Promise<any>(async (resolve, reject) => {
+        let succeed = 0, purchased = 0, notExist = 0;
+        for (let i = 0; i < ids.length; i++) {
+            let id = ids[i];
             const product = await loadByPackageId(id);
-            const record = await UserPurchaseRecordModel.findOne({ phoneNo: req.user.phoneNo, produceid: id });
             if (!product) {
                 notExist += 1;
             }
-            else if (!record) {
-                let userPurchaseProductRecord = new UserPurchaseRecordModel({
-                    phoneNo: req.user.phoneNo,
-                    produceid: id,
-                    title: product.questionTitle,
-                });
-                await userPurchaseProductRecord.save();
-                succeed += 1;
-            }
             else {
-                exist += 1;
+               const record = await UserPurchaseRecordModel.findOne({ phoneNo: phoneNo, produceid: id });
+               if (!record) {
+                    let userPurchaseProductRecord = new UserPurchaseRecordModel({
+                        phoneNo: phoneNo,
+                        produceid: id,
+                        title: product.questionTitle,
+                    });
+                    await userPurchaseProductRecord.save();
+                    succeed += 1;
+                }
+                else {
+                    purchased += 1;
+                }
             }
         }
-        if (succeed === req.body.levelPackageId.length) {
-            return res.json({
-                code: 10001,
-                message: 'OK',
-            });
-        }
-        else if (succeed) {
-            return res.json({
-                code: 10002,
-                message: `${succeed} succeed`,
-            });
-        }
-        else {
-            return res.json({
-                code: 0,
-                message: `${exist} products have been purchased, ${notExist} products does not exist,`,
-            });
-        }
+        return resolve({
+            succeed: succeed,
+            notExist: notExist,
+            purchased: purchased,
+        });
+    });
+}
+
+/**  */
+export let addProductItem = async (req: Request, res: Response, next: NextFunction) => {
+    let ids: any = req.body.levelPackageId;
+    if (/^\[[^\]]*\]/.test(ids)) {
+        ids = JSON.parse(ids);
     }
     else {
-        const product = await loadByPackageId(req.body.levelPackageId);
-        const record = await UserPurchaseRecordModel.findOne({ phoneNo: req.user.phoneNo, produceid: req.body.levelPackageId }); 
-        if (!product) {
-            return res.json({
-                code: 0,
-                message: 'the product does not exsit',
-            });
-        }
-        else if (!record) {
-            let userPurchaseProductRecord = new UserPurchaseRecordModel({
-                phoneNo: req.user.phoneNo,
-                produceid: req.body.levelPackageId,
-                title: product.questionTitle,
-            });
-            await userPurchaseProductRecord.save();
+        ids = new Array(ids);
+    }
+    console.log('levelPackageId:', ids)
+    addProduct(req.user.phoneNo, ids).then(val => {
+        if (val.succeed) {
             return res.json({
                 code: 10001,
                 message: 'OK',
@@ -178,10 +158,10 @@ export let addProductItem = async (req: Request, res: Response, next: NextFuncti
         else {
             return res.json({
                 code: 0,
-                message: 'the product has been purchased',
+                message: `${val.purchased ? val.purchased + ' purchased.' : ''}${val.notExist ? val.notExist + ' not exist.' : ''} `,
             });
         }
-    }
+    });
 };
 
 /**  */
