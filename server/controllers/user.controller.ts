@@ -17,7 +17,7 @@ import * as uuid from 'uuid';
 
 import * as speakeasy from 'speakeasy';
 import MySMSClient from '../config/sms-client';
-import { isArray } from 'util';
+import * as redis from '../config/redis';
 
 export let register = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -178,20 +178,104 @@ export let getProductItems = async (req: Request, res: Response, next: NextFunct
 /**  */
 export let updateHighestLevel = async (req: Request, res: Response, next: NextFunction) => {
     const highestLevel = Math.max((req.user.highestLevel || 0), (req.body.highestLevel || 0));
-    if (req.user.highestLevel === highestLevel) {
-        return res.json({
-            code: 10001,
-            message: 'no update'
-        });   
-    }
-    else {
+    if (!req.user.highestLevel || highestLevel > req.user.highestLevel) {
         req.user.highestLevel = highestLevel;
         await req.user.save();
+
+        const client = redis.getInstance();
+        client.zadd("highestLevel", highestLevel.toString(), req.user.phoneNo.toString());
         return res.json({
             code: 0,
             message: 'OK'
         });    
     }
+    else {
+        return res.json({
+            code: 10001,
+            message: 'no update'
+        });   
+    }
+};
+
+export let leaderBoard = async (req: Request, res: Response, next: NextFunction) => {
+    console.log("leaderBoard");
+
+    let skip = +(req.query.skip) || 0;
+    skip = Math.max(0, skip);
+
+    let limit = +(req.query.limit) || 50;
+    limit = Math.max(0, limit);
+
+    const client = redis.getInstance();
+    client.zrevrange("highestLevel", skip, skip + limit - 1, (redisError, redisResult) => {
+        console.log(redisResult);
+        const rankMap: any = {};
+        redisResult.forEach((phoneNo: string, index: number) => {
+            rankMap[phoneNo] = skip + index + 1;
+        });
+
+        UserModel.find({ phoneNo: { "$in": redisResult } }).then(dbResult => {
+            if (!dbResult) {
+                return res.json({
+                    error: true,
+                    message: "No user exists",
+                    data: undefined,
+                });
+            }
+            res.json({
+                error: false,
+                message: "OK",
+                data: dbResult.map((user, index) => {
+                    return {
+                        nickName: user.nickname || "",
+                        userName: user.username || "",
+                        avatarUrl: user.avatarUrl || "",
+                        highestLevel: user.highestLevel || 0,
+                        rank: rankMap[user.phoneNo.toString()]
+                    };
+                }).sort((lhs, rhs) => {
+                    return lhs.rank - rhs.rank;
+                })
+            });
+        });
+    });
+};
+
+export let playerRank = async (req: Request, res: Response, next: NextFunction) => {
+    console.log("playerRank");
+    const phoneNo = req.user.phoneNo;
+    const client = redis.getInstance();
+
+    client.zrevrank("highestLevel", phoneNo, (redisError, redisResult) => {
+        console.log(redisResult);
+        if (!redisResult && redisResult !== 0) {
+            return res.json({
+                error: true,
+                message: "No such user",
+                data: undefined
+            });
+        }
+        UserModel.findOne({ phoneNo: phoneNo }).then(user => {
+            if (!user) {
+                return res.json({
+                    error: true,
+                    message: "No such user",
+                    data: undefined
+                });
+            }
+            res.json({
+                error: false,
+                message: "OK",
+                data: {
+                    nickName: user.nickname || "",
+                    userName: user.username || "",
+                    avatarUrl: user.avatarUrl || "",
+                    highestLevel: user.highestLevel || 0,
+                    rank: redisResult + 1
+                }
+            });
+        });
+    });
 };
 
 export default { login, getVerificationCode };

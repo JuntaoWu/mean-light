@@ -20,12 +20,17 @@ router.route('/getVerificationCode')
 
 /**  */
 router.route('/addProductItem')
-    .post(passport.authenticate('jwt', { failWithError: true }), userCtrl.addProductItem);
+    .post(passport.authenticate('jwt', { failWithError: false }), userCtrl.addProductItem);
 
 router.route('/getProductItems')
-    .get(passport.authenticate('jwt', { failWithError: false }), userCtrl.getProductItems);
+    .get(passport.authenticate('jwt', { failWithError: true }), userCtrl.getProductItems);
 
 router.route('/updateHighestLevel')
-    .post(passport.authenticate('jwt', { failWithError: true }), userCtrl.updateHighestLevel);
+    .post(passport.authenticate('jwt', { failWithError: false }), userCtrl.updateHighestLevel);
+
+router.route('/leaderBoard')
+    .get(passport.authenticate('jwt', { failWithError: true }), userCtrl.leaderBoard);
+router.route('/playerRank')
+    .get(passport.authenticate('jwt', { failWithError: true }), userCtrl.playerRank);
 
 export default router;
