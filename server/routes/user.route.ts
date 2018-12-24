@@ -28,9 +28,14 @@ router.route('/getProductItems')
 router.route('/updateHighestLevel')
     .post(passport.authenticate('jwt', { failWithError: false }), userCtrl.updateHighestLevel);
 
+/** rank */
 router.route('/leaderBoard')
     .get(passport.authenticate('jwt', { failWithError: true }), userCtrl.leaderBoard);
 router.route('/playerRank')
     .get(passport.authenticate('jwt', { failWithError: true }), userCtrl.playerRank);
 
+/** setting */
+router.route('/settingUser')
+    .post(passport.authenticate('jwt', { failWithError: false }), userCtrl.settingUser);
+    
 export default router;

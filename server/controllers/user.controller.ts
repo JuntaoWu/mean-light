@@ -50,6 +50,7 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
             token: token,
             username: req.body.phoneNo,
             nickname: user.nickname,
+            avatarUrlGroup: user.avatarUrlGroup || 0,
         }
     });
 };
@@ -230,6 +231,7 @@ export let leaderBoard = async (req: Request, res: Response, next: NextFunction)
                         nickName: user.nickname || "",
                         userName: user.username || "",
                         avatarUrl: user.avatarUrl || "",
+                        avatarUrlGroup: user.avatarUrlGroup || 0,
                         highestLevel: user.highestLevel || 0,
                         rank: rankMap[user.phoneNo.toString()]
                     };
@@ -270,12 +272,26 @@ export let playerRank = async (req: Request, res: Response, next: NextFunction) 
                     nickName: user.nickname || "",
                     userName: user.username || "",
                     avatarUrl: user.avatarUrl || "",
+                    avatarUrlGroup: user.avatarUrlGroup || 0,
                     highestLevel: user.highestLevel || 0,
                     rank: redisResult + 1
                 }
             });
         });
     });
+};
+
+
+export let settingUser = async (req: Request, res: Response, next: NextFunction) => {
+    let user = req.user;
+    user.avatarUrlGroup = req.body.avatarUrlGroup || user.avatarUrlGroup;
+    user.nickname = req.body.nickName || user.nickname;
+    await user.save();
+    
+    return res.json({
+        code: 0,
+        message: 'OK'
+    }); 
 };
 
 export default { login, getVerificationCode };

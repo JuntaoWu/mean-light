@@ -29,6 +29,9 @@ export class User extends Typegoose {
 
   @prop()
   public highestLevel?: Number;
+  
+  @prop()
+  public avatarUrlGroup?: Number;
 }
 
 const UserModel = new User().getModelForClass(User, {
