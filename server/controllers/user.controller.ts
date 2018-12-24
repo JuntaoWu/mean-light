@@ -290,8 +290,12 @@ export let settingUser = async (req: Request, res: Response, next: NextFunction)
     
     return res.json({
         code: 0,
-        message: 'OK'
-    }); 
+        message: 'OK',
+        data: {
+            nickname: user.nickname,
+            avatarUrlGroup: user.avatarUrlGroup || 0,
+        }
+    });
 };
 
 export default { login, getVerificationCode };
