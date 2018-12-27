@@ -190,7 +190,7 @@ export class QuestionManageComponent implements OnInit {
 
   handleCancel(): void {
     this.ismodalVisible = false;
-    this.question.levelPackageId = this.questionNo;
+    this.question.levelPackageId = this.questionNo = "";
   }
 
 }

@@ -137,7 +137,7 @@ let addProduct = (phoneNo: any, ids: Array<string>) => {
             purchased: purchased,
         });
     });
-}
+};
 
 /**  */
 export let addProductItem = async (req: Request, res: Response, next: NextFunction) => {
