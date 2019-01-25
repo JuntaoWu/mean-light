@@ -60,7 +60,6 @@ export class QuestionManageComponent implements OnInit {
   }
 
   subSelectChange(tabIndex: number) {
-    console.log(111, tabIndex)
     const tabs = [null, 'wulong'];
     this.fromApp = tabs[tabIndex];
     this.getQuestionList();
