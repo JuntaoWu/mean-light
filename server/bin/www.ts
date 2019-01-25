@@ -24,9 +24,10 @@ import * as mongoose from 'mongoose';
 const port = normalizePort(config.port);
 
 // connect to mongo db
-const mongoUri = config.mongo.host;
-mongoose.connect(mongoUri, { server: { socketOptions: { keepAlive: 1 } } });
-mongoose.connection.on('error', () => {
+const mongoUri = config.mongo.hostDefault;
+const instance = new mongoose.Mongoose();
+instance.createConnection(mongoUri, { server: { socketOptions: { keepAlive: 5 } } });
+instance.connection.on('error', () => {
   throw new Error(`unable to connect to database: ${mongoUri}`);
 }).on('connected', () => {
   console.log('Mongodb connected');

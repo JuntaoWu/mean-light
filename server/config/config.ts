@@ -63,7 +63,8 @@ export const config = {
     mongooseDebug: envVars.MONGOOSE_DEBUG,
     jwtSecret: envVars.JWT_SECRET,
     mongo: {
-        host: envVars.MONGO_HOST,
+        hostDefault: envVars.MONGO_HOST,
+        hostTenant1: envVars.MONGO_HOST_TENANT1,
         port: envVars.MONGO_PORT,
     },
     wx: {

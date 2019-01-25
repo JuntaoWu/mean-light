@@ -97,24 +97,34 @@ router.post('/remove', (req, res, next) => {
 router.get('/:id', (req, res, next) => {
     console.log('get:', req.params);
 
-    questionCtrl.load(req.params.id)
-        .then(question => {
-            if (!question && !req.body.CreateIfNotExists) {
-                return res.json({
-                    ResultCode: 3,
-                    Message: 'Question not found and won\'t create',
-                });
-            } else {
-                const result = {
-                    ResultCode: 0,
-                    Message: 'OK',
-                    result: question,
-                };
-                console.log(result);
-                return res.json(result);
-            }
-        })
-        .catch(next);
+    try {
+        questionCtrl.load(req.params.id, req.query.tenantId)
+            .then((question: any) => {
+                if (!question && !req.body.CreateIfNotExists) {
+                    return res.json({
+                        ResultCode: 3,
+                        Message: 'Question not found and won\'t create',
+                    });
+                } else {
+                    const result = {
+                        ResultCode: 0,
+                        Message: 'OK',
+                        result: question,
+                    };
+                    console.log(result);
+                    return res.json(result);
+                }
+            })
+            .catch((err) => {
+                console.error(err);
+                return next(err);
+            });
+    }
+    catch (ex) {
+        console.error(ex);
+    }
+
+
 });
 
 router.get('/getByPackageId/:id', (req, res, next) => {

@@ -1,10 +1,13 @@
-import QuestionModel, { Questions } from '../models/questions.model';
+import QuestionModel, { QuestionModelPool, Questions } from '../models/questions.model';
 import { Request, Response, NextFunction } from 'express';
 import { IncomingMessage } from 'http';
 import { date } from 'joi';
 
-export let load = async (questionsId: string) => {
-    return QuestionModel.findOne({ _id: questionsId });
+export let load = async (questionsId: string, tenantId?: string): Promise<any> => {
+    tenantId = tenantId || 'Default';
+    return QuestionModelPool(tenantId).findOne({ _id: questionsId }).catch((err) => {
+        console.error(err);
+    });
 };
 
 export let loadByPackageId = async (levelPackageId: string) => {
@@ -26,7 +29,7 @@ export let create = async (body: any) => {
 };
 
 export let update = (questionsId, body: Questions) => {
-    return load(questionsId).then(async (question) => {
+    return load(questionsId).then(async (question: any) => {
         if (question) {
             question = Object.assign(question, body);
         } else {
