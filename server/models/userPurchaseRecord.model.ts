@@ -13,6 +13,9 @@ export class UserPurchaseRecord extends Typegoose {
   public produceid?: String;
 
   @prop()
+  public fromApp?: String;
+
+  @prop()
   public title?: string;
 }
 

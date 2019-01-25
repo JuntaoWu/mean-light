@@ -13,6 +13,9 @@ export class User extends Typegoose {
   public username?: String;  // make username same as phoneNo in China.
 
   @prop()
+  public fromApp?: String; //
+
+  @prop()
   public nickname?: String;
 
   @prop()

@@ -19,8 +19,8 @@ const localOptions: IStrategyOptionsWithRequest = {
 
 // Setting up local login strategy
 const localLogin = new LocalStrategy(localOptions, (req, username, password, done) => {
-    console.log('localLogin');
-    User.findOne({ username: username }, async (err, user) => {
+    console.log('localLogin', req.body);
+    User.findOne({ username: username, fromApp: req.body.fromApp }, async (err, user) => {
         if (err) { return done(err); }
         if (!user) {
             return done(null, false);
@@ -59,7 +59,7 @@ const jwtOptions: StrategyOptions = {
 // Setting up JWT login strategy
 const jwtLogin = new JwtStrategy(jwtOptions, (payload, done) => {
 
-    UserModel.findOne({ username: payload.username }).then(user => {
+    UserModel.findOne({ username: payload.username, fromApp: payload.fromApp }).then(user => {
         done(null, user);
     }).catch(error => {
         done(null, false);

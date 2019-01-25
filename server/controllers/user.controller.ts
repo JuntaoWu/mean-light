@@ -40,7 +40,8 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const token = jwt.sign({
-        username: req.body.phoneNo
+        username: req.body.phoneNo,
+        fromApp: req.body.fromApp
     }, config.jwtSecret);
 
     return res.json({
@@ -59,7 +60,7 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
  * send verification code via SMS for TF-Validation
  */
 export let getVerificationCode = async (req, res, next) => {
-    let user = await UserModel.findOne({ phoneNo: req.body.phoneNo });
+    let user = await UserModel.findOne({ phoneNo: req.body.phoneNo, fromApp: req.body.fromApp });
 
     // create user when first time get SMS code.
     if (!user) {
@@ -67,6 +68,7 @@ export let getVerificationCode = async (req, res, next) => {
             username: req.body.phoneNo,
             phoneNo: req.body.phoneNo,
             securityStamp: speakeasy.generateSecret().base32,
+            fromApp: req.body.fromApp,
         });
         await user.save();
     }
@@ -106,7 +108,7 @@ export let getVerificationCode = async (req, res, next) => {
     });
 };
 
-let addProduct = (phoneNo: any, ids: Array<string>) => {
+let addProduct = (user: any, ids: Array<string>) => {
     return new Promise<any>(async (resolve, reject) => {
         let succeed = 0, purchased = 0, notExist = 0;
         for (let i = 0; i < ids.length; i++) {
@@ -116,10 +118,11 @@ let addProduct = (phoneNo: any, ids: Array<string>) => {
                 notExist += 1;
             }
             else {
-               const record = await UserPurchaseRecordModel.findOne({ phoneNo: phoneNo, produceid: id });
+               const record = await UserPurchaseRecordModel.findOne({ phoneNo: user.phoneNo, fromApp: user.fromApp, produceid: id });
                if (!record) {
                     let userPurchaseProductRecord = new UserPurchaseRecordModel({
-                        phoneNo: phoneNo,
+                        phoneNo: user.phoneNo,
+                        fromApp: user.fromApp,
                         produceid: id,
                         title: product.questionTitle,
                     });
@@ -149,7 +152,7 @@ export let addProductItem = async (req: Request, res: Response, next: NextFuncti
         ids = new Array(ids);
     }
     console.log('levelPackageId:', ids)
-    addProduct(req.user.phoneNo, ids).then(val => {
+    addProduct(req.user, ids).then(val => {
         if (val.succeed) {
             return res.json({
                 code: 10001,
@@ -167,7 +170,7 @@ export let addProductItem = async (req: Request, res: Response, next: NextFuncti
 
 /**  */
 export let getProductItems = async (req: Request, res: Response, next: NextFunction) => {
-    const records = await UserPurchaseRecordModel.find({ phoneNo: req.user.phoneNo });
+    const records = await UserPurchaseRecordModel.find({ phoneNo: req.user.phoneNo, fromApp: req.user.fromApp });
     return res.json({
         username: req.user.nickname,
         phoneno: req.user.phoneNo,
@@ -184,7 +187,7 @@ export let updateHighestLevel = async (req: Request, res: Response, next: NextFu
         await req.user.save();
 
         const client = redis.getInstance();
-        client.zadd("highestLevel", highestLevel.toString(), req.user.phoneNo.toString());
+        client.zadd(`highestLevel${req.user.fromApp}`, highestLevel.toString(), req.user.phoneNo.toString());
         return res.json({
             code: 0,
             message: 'OK'
@@ -208,7 +211,7 @@ export let leaderBoard = async (req: Request, res: Response, next: NextFunction)
     limit = Math.max(0, limit);
 
     const client = redis.getInstance();
-    client.zrevrange("highestLevel", skip, skip + limit - 1, (redisError, redisResult) => {
+    client.zrevrange(`highestLevel${req.user.fromApp}`, skip, skip + limit - 1, (redisError, redisResult) => {
         console.log(redisResult);
         const rankMap: any = {};
         redisResult.forEach((phoneNo: string, index: number) => {
@@ -248,7 +251,7 @@ export let playerRank = async (req: Request, res: Response, next: NextFunction) 
     const phoneNo = req.user.phoneNo;
     const client = redis.getInstance();
 
-    client.zrevrank("highestLevel", phoneNo, (redisError, redisResult) => {
+    client.zrevrank(`highestLevel${req.user.fromApp}`, phoneNo, (redisError, redisResult) => {
         console.log(redisResult);
         if (!redisResult && redisResult !== 0) {
             return res.json({
