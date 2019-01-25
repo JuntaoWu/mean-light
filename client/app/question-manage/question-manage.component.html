@@ -29,6 +29,17 @@
               </nz-form-item> -->
 
               <nz-form-item>
+                <nz-form-label [nzSpan]="5" nzFor="qForApp">题库app</nz-form-label>
+                <nz-form-control [nzSpan]="15">
+                  <nz-select [ngModelOptions]="{standalone: true}" id="qForApp" [(ngModel)]="question.qForApp" nzAllowClear nzPlaceHolder="Choose">
+                    <nz-option nzValue="wulong" nzLabel="舞龙达人"></nz-option>
+                  </nz-select>
+
+                  <!-- <input nz-input [ngModelOptions]="{standalone: true}" id="qForApp" placeholder="请填写该题库属于的app" [(ngModel)]="question.qForApp"> -->
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item>
                 <nz-form-label [nzSpan]="5" nzFor="levelPackageId">题库ID(苹果ID)</nz-form-label>
                 <nz-form-control [nzSpan]="15">
                   <input nz-input (blur)="isQuestionExisted()" [ngModelOptions]="{standalone: true}" id="levelPackageId" placeholder="请填写该题库在appstroe上的商品id.." [(ngModel)]="question.levelPackageId">
@@ -71,6 +82,11 @@
             </form>
           </nz-tab>
           <nz-tab nzTitle="题库列表">  
+            <nz-tabset (nzSelectedIndexChange)="subSelectChange($event)">
+              <nz-tab nzTitle="奇妙海岛"></nz-tab>
+              <nz-tab nzTitle="舞龙达人"></nz-tab>
+            </nz-tabset>
+
             <div style="overflow-x: auto;">
               <nz-table #basicTable [nzPageIndex]="pageIndex" [nzPageSize]="pageSize"
               [nzData]="questionList">

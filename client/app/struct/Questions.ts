@@ -6,4 +6,5 @@ export class Questions {
     qVersion?: number; 
     qUrl?: string; 
     updatedAt?: string;
+    qForApp?: string;
   }

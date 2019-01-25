@@ -13,8 +13,8 @@ export class ManageService {
     return this.http.post('/api/levelpackage/remove', {_id: id});
   }
   
-  getQuestionList(params?: { limit?: number, skip?: number }) {
-    return this.http.post<Questions[]>('/api/levelpackage', {});
+  getQuestionList(params?: { limit?: number, skip?: number, fromApp?: string }) {
+    return this.http.post<Questions[]>('/api/levelpackage', params);
   }
   
   getQuestionByPackageId(id: string) {

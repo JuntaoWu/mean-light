@@ -11,10 +11,10 @@ export let loadByPackageId = async (levelPackageId: string) => {
     return QuestionModel.findOne({ levelPackageId: levelPackageId });
 };
 
-export let list = async (params: { limit?: number, skip?: number, timeStamp?: string }) => {
-    const { limit = 0, skip = 0, timeStamp } = params;
+export let list = async (params: { limit?: number, skip?: number, timeStamp?: string, fromApp?: string }) => {
+    const { limit = 0, skip = 0, timeStamp, fromApp } = params;
     const myTimeStamp = timeStamp || 0;
-    const existsCondition = { 'updatedAt': { $gt: new Date(myTimeStamp) } };
+    const existsCondition = { 'updatedAt': { $gt: new Date(myTimeStamp) }, 'qForApp': fromApp };
     return await QuestionModel.find(existsCondition).limit(+limit).skip(+skip).exec();
 };
 

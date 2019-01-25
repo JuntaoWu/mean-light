@@ -24,6 +24,7 @@ export class QuestionManageComponent implements OnInit {
   pageIndex: number;
   questionNo: string = null;
   modalType: string;
+  fromApp: string = null;
 
   constructor(private http: HttpClient, private manageService: ManageService) { }
 
@@ -37,6 +38,7 @@ export class QuestionManageComponent implements OnInit {
       questionDes: null,
       qVersion: 1,
       qUrl: null,
+      qForApp: null,
     }
   }
 
@@ -48,12 +50,20 @@ export class QuestionManageComponent implements OnInit {
     this.question.questionDes = null;
     this.question.qVersion = 1,
     this.question.qUrl = null;
+    this.question.qForApp = null;
   }
 
   selectChange() {
     if (this.activeTab && !this.questionList.length) {
       this.getQuestionList();
     }
+  }
+
+  subSelectChange(tabIndex: number) {
+    console.log(111, tabIndex)
+    const tabs = [null, 'wulong'];
+    this.fromApp = tabs[tabIndex];
+    this.getQuestionList();
   }
 
   isQuestionExisted() {
@@ -126,8 +136,8 @@ export class QuestionManageComponent implements OnInit {
   }
 
   getQuestionList() {
-    let param = { limit: this.pageSize, skip: this.pageSize * (this.pageIndex - 1) }
-    this.manageService.getQuestionList().subscribe(
+    let param = { limit: this.pageSize, skip: this.pageSize * (this.pageIndex - 1), fromApp: this.fromApp }
+    this.manageService.getQuestionList(param).subscribe(
       (val: any) => {
         console.log(val)
         if (val.result) {
