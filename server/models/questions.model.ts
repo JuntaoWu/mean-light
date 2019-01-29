@@ -16,6 +16,8 @@ export class Questions extends Typegoose {
     qUrl: String;
     @prop()
     qForApp?: String;
+    @prop()
+    qType?: String;
 
     @prop()
     updatedAt: Date;

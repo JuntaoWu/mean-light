@@ -39,6 +39,7 @@ export class QuestionManageComponent implements OnInit {
       qVersion: 1,
       qUrl: null,
       qForApp: null,
+      qType: null,
     }
   }
 
@@ -51,6 +52,20 @@ export class QuestionManageComponent implements OnInit {
     this.question.qVersion = 1,
     this.question.qUrl = null;
     this.question.qForApp = null;
+    this.question.qType = null;
+  }
+
+  appTypeChange() {
+    console.log(this.question.qForApp);
+    setTimeout(() => {
+      console.log(this.question.qForApp);
+      if (!this.question.qForApp) {
+        this.question.qType = null;
+      }
+      else {
+        this.question.qType = "type1";
+      }
+    }, 0);
   }
 
   selectChange() {
@@ -135,7 +150,8 @@ export class QuestionManageComponent implements OnInit {
   }
 
   getQuestionList() {
-    let param = { limit: this.pageSize, skip: this.pageSize * (this.pageIndex - 1), fromApp: this.fromApp }
+    let param = { limit: this.pageSize, skip: this.pageSize * (this.pageIndex - 1), fromApp: this.fromApp };
+    this.questionList = [];
     this.manageService.getQuestionList(param).subscribe(
       (val: any) => {
         console.log(val)

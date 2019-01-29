@@ -14,16 +14,20 @@ router.get('/getLevelPackages', (req, res, next) => {
                     State: '',
                 });
             } else {
-                const questions = question.map(i => {
+                let questions = question.map(i => {
                     return {
                         levelPackageNo: i._id,
                         levelPackageId: i.levelPackageId,
                         levelPackageTitle: i.questionTitle,
                         levelPackageDes: i.questionDes,
                         qVersion: i.qVersion,
-                        qUrl: i.qUrl
+                        qUrl: i.qUrl,
+                        qType: i.qType,
                     };
                 });
+                if (req.query.type) {
+                    questions = questions.filter(i => i.qType == req.query.type);
+                }
 
                 let newTimeStamp = req.query.timeStamp;
                 if (question && question.length) {

@@ -31,11 +31,22 @@
               <nz-form-item>
                 <nz-form-label [nzSpan]="5" nzFor="qForApp">题库app</nz-form-label>
                 <nz-form-control [nzSpan]="15">
-                  <nz-select [ngModelOptions]="{standalone: true}" id="qForApp" [(ngModel)]="question.qForApp" nzAllowClear nzPlaceHolder="Choose">
+                  <nz-select [ngModelOptions]="{standalone: true}" id="qForApp" (ngModelChange)="appTypeChange()"
+                  [(ngModel)]="question.qForApp" nzAllowClear nzPlaceHolder="Choose">
                     <nz-option nzValue="wulong" nzLabel="舞龙达人"></nz-option>
                   </nz-select>
 
                   <!-- <input nz-input [ngModelOptions]="{standalone: true}" id="qForApp" placeholder="请填写该题库属于的app" [(ngModel)]="question.qForApp"> -->
+                </nz-form-control>
+              </nz-form-item>
+
+              <nz-form-item *ngIf="question.qType">
+                <nz-form-label [nzSpan]="5" nzFor="qType">题库类型</nz-form-label>
+                <nz-form-control [nzSpan]="15">
+                  <nz-select [ngModelOptions]="{standalone: true}" id="qType" [(ngModel)]="question.qType" nzPlaceHolder="Choose">
+                    <nz-option nzValue="type1" nzLabel="类型1"></nz-option>
+                    <nz-option nzValue="type2" nzLabel="类型2"></nz-option>
+                  </nz-select>
                 </nz-form-control>
               </nz-form-item>
 
@@ -94,6 +105,7 @@
                 <tr>
                   <!-- <th style="width: 100px">题库编号</th> -->
                   <th style="width: 120px">题库商品ID</th>
+                  <th *ngIf="fromApp == 'wulong'" style="width: 120px">题库类型</th>
                   <th style="width: 150px">题库标题</th>
                   <th>题库描述</th>
                   <th style="width: 150px">更新时间</th>
@@ -104,6 +116,7 @@
                 <tr *ngFor="let data of basicTable.data">
                   <!-- <td>{{data.questionsId}}</td> -->
                   <td>{{data.levelPackageId}}</td>
+                  <td *ngIf="fromApp == 'wulong'">{{data.qType}}</td>
                   <td>{{data.questionTitle}}</td>
                   <td>{{data.questionDes}}</td>
                   <td>{{data.updatedAt | date:"yyyy-MM-dd hh:mm:ss"}}</td>
