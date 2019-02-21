@@ -218,7 +218,7 @@ export let leaderBoard = async (req: Request, res: Response, next: NextFunction)
             rankMap[phoneNo] = skip + index + 1;
         });
 
-        UserModel.find({ phoneNo: { "$in": redisResult } }).then(dbResult => {
+        UserModel.find({ phoneNo: { "$in": redisResult }, fromApp: req.user.fromApp }).then(dbResult => {
             if (!dbResult) {
                 return res.json({
                     error: true,
@@ -260,7 +260,7 @@ export let playerRank = async (req: Request, res: Response, next: NextFunction) 
                 data: undefined
             });
         }
-        UserModel.findOne({ phoneNo: phoneNo }).then(user => {
+        UserModel.findOne({ phoneNo: phoneNo, fromApp: req.user.fromApp }).then(user => {
             if (!user) {
                 return res.json({
                     error: true,
