@@ -5,6 +5,7 @@ import config from '../config/config';
 
 import { Request, Response, NextFunction } from 'express';
 import UserModel, { User } from '../models/user.model';
+import RecordModel, { Record } from '../models/record.model';
 import UserPurchaseRecordModel from '../models/userPurchaseRecord.model';
 import { loadByPackageId } from '../controllers/questions.controller';
 
@@ -187,7 +188,7 @@ export let updateHighestLevel = async (req: Request, res: Response, next: NextFu
         await req.user.save();
 
         const client = redis.getInstance();
-        client.zadd(`highestLevel${req.user.fromApp}`, highestLevel.toString(), req.user.phoneNo.toString());
+        client.zadd(`highestLevel`, highestLevel.toString(), req.user.phoneNo.toString());
         return res.json({
             code: 0,
             message: 'OK'
@@ -211,37 +212,42 @@ export let leaderBoard = async (req: Request, res: Response, next: NextFunction)
     limit = Math.max(0, limit);
 
     const client = redis.getInstance();
-    client.zrevrange(`highestLevel${req.user.fromApp}`, skip, skip + limit - 1, (redisError, redisResult) => {
-        console.log(redisResult);
+    client.zrevrange(`highestLevel${req.user.fromApp || ''}`, skip, skip + limit - 1, async (redisError, redisResult) => {
+        console.log(req.user.fromApp, redisResult);
         const rankMap: any = {};
         redisResult.forEach((phoneNo: string, index: number) => {
             rankMap[phoneNo] = skip + index + 1;
         });
 
-        UserModel.find({ phoneNo: { "$in": redisResult }, fromApp: req.user.fromApp }).then(dbResult => {
-            if (!dbResult) {
-                return res.json({
-                    error: true,
-                    message: "No user exists",
-                    data: undefined,
-                });
-            }
-            res.json({
-                error: false,
-                message: "OK",
-                data: dbResult.map((user, index) => {
-                    return {
-                        nickName: user.nickname || "",
-                        userName: user.username || "",
-                        avatarUrl: user.avatarUrl || "",
-                        avatarUrlGroup: user.avatarUrlGroup || 0,
-                        highestLevel: user.highestLevel || 0,
-                        rank: rankMap[user.phoneNo.toString()]
-                    };
-                }).sort((lhs, rhs) => {
-                    return lhs.rank - rhs.rank;
-                })
+        const userResult = await UserModel.find({ phoneNo: { "$in": redisResult }, fromApp: req.user.fromApp });
+        if (!userResult) {
+            return res.json({
+                error: true,
+                message: "No user exists",
+                data: undefined,
             });
+        }
+        let recordList = [];
+        if (req.user.fromApp) {
+            recordList = await RecordModel.find({ userId: { "$in": redisResult } });
+        }
+        res.json({
+            error: false,
+            message: "OK",
+            data: userResult.map((user, index) => {
+                const record = recordList.find(i => i.userId == user.phoneNo);
+                return {
+                    nickName: user.nickname || "",
+                    userName: user.username || "",
+                    avatarUrl: user.avatarUrl || "",
+                    avatarUrlGroup: user.avatarUrlGroup || 0,
+                    highestLevel: user.highestLevel || 0,
+                    highestScore: record && record.highestScore,
+                    rank: rankMap[user.phoneNo.toString()]
+                };
+            }).sort((lhs, rhs) => {
+                return lhs.rank - rhs.rank;
+            }),
         });
     });
 };
@@ -251,7 +257,7 @@ export let playerRank = async (req: Request, res: Response, next: NextFunction) 
     const phoneNo = req.user.phoneNo;
     const client = redis.getInstance();
 
-    client.zrevrank(`highestLevel${req.user.fromApp}`, phoneNo, (redisError, redisResult) => {
+    client.zrevrank(`highestLevel${req.user.fromApp || ''}`, phoneNo, async (redisError, redisResult) => {
         console.log(redisResult);
         if (!redisResult && redisResult !== 0) {
             return res.json({
@@ -259,6 +265,10 @@ export let playerRank = async (req: Request, res: Response, next: NextFunction) 
                 message: "No such user",
                 data: undefined
             });
+        }
+        let record;
+        if (req.user.fromApp) {
+            record = await RecordModel.findOne({ userId: phoneNo });
         }
         UserModel.findOne({ phoneNo: phoneNo, fromApp: req.user.fromApp }).then(user => {
             if (!user) {
@@ -277,6 +287,7 @@ export let playerRank = async (req: Request, res: Response, next: NextFunction) 
                     avatarUrl: user.avatarUrl || "",
                     avatarUrlGroup: user.avatarUrlGroup || 0,
                     highestLevel: user.highestLevel || 0,
+                    highestScore: record && record.highestScore,
                     rank: redisResult + 1
                 }
             });

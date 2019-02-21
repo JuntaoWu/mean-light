@@ -10,26 +10,27 @@ export let updateLevelScore = async (req: Request, res: Response, next: NextFunc
     if (!rankRecord) {
         rankRecord = new RecordModel({
             userId: req.user.phoneNo,
-            levelScore: [0],
-            highestLevel: req.body.level,
+            levelScore: [],
+            highestScore: 0,
         });
     }
-    if (req.body.level > rankRecord.highestLevel || req.body.score > rankRecord.levelScore[req.body.level-1]) {
-        if (req.body.level > rankRecord.highestLevel) {
-            rankRecord.highestLevel = req.body.level;
+    if (!req.user.highestLevel || req.body.level > req.user.highestLevel || req.body.score > rankRecord.levelScore[req.body.level-1]) {
+        if (!req.user.highestLevel || req.body.level > req.user.highestLevel) {
+            req.user.highestLevel = req.body.level;
+            await req.user.save();
         }
         let scoreList = rankRecord.levelScore.map(i => i);
         scoreList[req.body.level-1] = isNaN(req.body.score) ? 0 : +req.body.score;
         rankRecord.levelScore = scoreList;
         // rankRecord.levelScore[level-1] = isNaN(score) ? 0 : +score;
+
+        const highestScore = req.user.highestLevel + rankRecord.levelScore.reduce((total, num) => { return total + num });
+        rankRecord.highestScore = highestScore;
         await rankRecord.save();
-        
-        const highestLevel = rankRecord.highestLevel + rankRecord.levelScore.reduce((total, num) => { return total + num });
-        req.user.highestLevel = highestLevel;
-        await req.user.save();
+        console.log(req.user.fromApp);
 
         const client = redis.getInstance();
-        client.zadd(`highestLevel${req.user.fromApp}`, highestLevel.toString(), req.user.phoneNo.toString());
+        client.zadd(`highestLevel${req.user.fromApp}`, highestScore.toString(), req.user.phoneNo.toString());
         return res.json({
             code: 0,
             message: 'OK'
@@ -43,14 +44,39 @@ export let updateLevelScore = async (req: Request, res: Response, next: NextFunc
     }
 };
 
+// export let updateLevelScoreByList = async (req: Request, res: Response, next: NextFunction) => {
+//     let rankRecord = await RecordModel.findOne({ userId: req.user.phoneNo });
+//     if (!rankRecord) {
+//         rankRecord = new RecordModel({
+//             userId: req.user.phoneNo,
+//             levelScore: [],
+//             highestScore: 0,
+//         });
+//     }
+//     let scoreList = JSON.parse(req.body.scores);
+//     rankRecord.levelScore = scoreList;
+//     req.user.highestLevel = scoreList.length;
+//     await req.user.save();
+
+//     const highestScore = rankRecord.highestScore + rankRecord.levelScore.reduce((total, num) => { return total + num });
+//     rankRecord.highestScore = highestScore;
+//     await rankRecord.save();
+
+//     const client = redis.getInstance();
+//     client.zadd(`highestLevel${req.user.fromApp}`, highestScore.toString(), req.user.phoneNo.toString());
+//     return res.json({
+//         code: 0,
+//         message: 'OK'
+//     });
+// };
 
 export let getLevelScore = async (req: Request, res: Response, next: NextFunction) => {
     let rankRecord = await RecordModel.findOne({ userId: req.user.phoneNo });
     if (!rankRecord) {
         rankRecord = new RecordModel({
             userId: req.user.phoneNo,
-            levelScore: [0],
-            highestLevel: 1,
+            levelScore: [],
+            highestScore: 0,
         });
         await rankRecord.save();
     }
@@ -59,7 +85,7 @@ export let getLevelScore = async (req: Request, res: Response, next: NextFunctio
         message: 'OK',
         data: {
             levelScore: rankRecord.levelScore,
-            highestLevel: rankRecord.highestLevel,
+            highestLevel: rankRecord.levelScore.length,
         }
     });
 };

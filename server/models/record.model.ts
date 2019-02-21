@@ -153,7 +153,7 @@ export class Record extends Typegoose {
     @prop()
     levelScore: Array<number>;
     @prop()
-    highestLevel: number;
+    highestScore: number;
 }
 
 const RecordModel = new Record().getModelForClass(Record, {
