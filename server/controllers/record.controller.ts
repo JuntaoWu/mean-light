@@ -61,7 +61,7 @@ export let updateLevelScoreList = async (req: Request, res: Response, next: Next
         await req.user.save();
     }
     for (let i = 0; i < highestLevel; i++) {
-        scoreList[i] = Math.max((scoreList[i] || 0), (rankRecord.levelScore[i] || 0));
+        scoreList[i] = Math.max((scoreList[i] || 0), (rankRecord.levelScore[i] || 0)) || null;
     }
     rankRecord.levelScore = scoreList;
 
