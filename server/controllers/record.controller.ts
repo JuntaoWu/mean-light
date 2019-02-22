@@ -54,7 +54,7 @@ export let updateLevelScoreList = async (req: Request, res: Response, next: Next
         });
     }
 
-    const scoreList = JSON.parse(req.body.scores);
+    const scoreList = JSON.parse(req.body.scores) || [];
     const highestLevel = Math.max(scoreList.length, rankRecord.levelScore.length);
     if (highestLevel > rankRecord.levelScore.length) {
         req.user.highestLevel = scoreList.length;
