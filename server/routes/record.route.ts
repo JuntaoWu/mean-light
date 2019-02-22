@@ -17,5 +17,7 @@ router.route('/updateLevelScore')
     .post(passport.authenticate('jwt', { failWithError: false }), recordCtrl.updateLevelScore);
 router.route('/getLevelScore')
     .get(passport.authenticate('jwt', { failWithError: false }), recordCtrl.getLevelScore);
+router.route('/updateLevelScoreList')
+    .post(passport.authenticate('jwt', { failWithError: false }), recordCtrl.updateLevelScoreList);
 
 export default router;
